@@ -35,9 +35,11 @@
       <p class="lead text-muted">{{ product.description }}</p>
 
       <div class="d-grid gap-2 d-md-flex mt-5">
-        <button class="btn btn-dark btn-lg px-5 rounded-pill">
-          🛒 Add to Cart
-        </button>
+        <a
+          href="/add-to-cart/{{ product.id }}"
+          class="btn btn-dark btn-lg px-5 rounded-pill"
+          >🛒 Add to Cart</a
+        >
         <button class="btn btn-outline-danger btn-lg rounded-pill">
           ❤️ Wishlist
         </button>
