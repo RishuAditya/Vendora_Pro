@@ -1,0 +1,31 @@
+{% extends "base.html" %} {% block content %}
+<div class="container mt-5">
+  <h2 class="mb-4">Seller Dashboard</h2>
+  <div class="row">
+    <div class="col-md-4">
+      <div class="card text-white bg-success mb-3 shadow">
+        <div class="card-body">
+          <h5 class="card-title">Total Sales</h5>
+          <p class="card-text fs-3">₹0.00</p>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-4">
+      <div class="card text-white bg-info mb-3 shadow">
+        <div class="card-body">
+          <h5 class="card-title">Pending Orders</h5>
+          <p class="card-text fs-3">0</p>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-4">
+      <div class="card text-white bg-warning mb-3 shadow text-dark">
+        <div class="card-body">
+          <h5 class="card-title">Seller Score</h5>
+          <p class="card-text fs-3">100 / 100 (Bronze)</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
