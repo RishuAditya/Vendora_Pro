@@ -64,7 +64,7 @@ def login():
             elif user.role == "seller":
                 return redirect("/seller/dashboard") # Dummy URL for now
             else:
-                return redirect("/")
+                return redirect(url_for("customer.dashboard"))
         else:
             flash("Login failed. Check email and password.", "danger")
 

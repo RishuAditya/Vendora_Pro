@@ -1,0 +1,75 @@
+{% extends "base.html" %} {% block content %}
+<!-- Hero Section -->
+<div class="container mt-4">
+  <div
+    class="p-5 mb-4 bg-dark text-white rounded-5 shadow-lg position-relative overflow-hidden"
+  >
+    <div class="container-fluid py-5 position-relative" style="z-index: 2">
+      <h1 class="display-4 fw-bold">Discover Premium Products</h1>
+      <p class="col-md-8 fs-4 text-light-50">
+        Vendora Pro is your one-stop shop for everything. From electronics to
+        fashion, we've got you covered.
+      </p>
+      {% if not current_user.is_authenticated %}
+      <a
+        href="/register"
+        class="btn btn-primary btn-lg px-5 rounded-pill shadow"
+        >Get Started</a
+      >
+      {% else %}
+      <a
+        href="/{{ current_user.role }}/dashboard"
+        class="btn btn-warning btn-lg px-5 rounded-pill shadow text-dark fw-bold"
+        >Go to My Dashboard</a
+      >
+      {% endif %}
+    </div>
+    <!-- Background Glow decoration -->
+    <div
+      class="position-absolute"
+      style="
+        top: -50px;
+        right: -50px;
+        width: 300px;
+        height: 300px;
+        background: rgba(13, 110, 253, 0.2);
+        filter: blur(80px);
+        border-radius: 50%;
+      "
+    ></div>
+  </div>
+
+  <!-- Products Section -->
+  <div class="mt-5">
+    <h3 class="fw-bold mb-4">🛒 Featured Products</h3>
+    <div class="row">
+      {% if products %} {% for product in products %}
+      <div class="col-md-3 mb-4">
+        <div class="card glass-card shadow-sm h-100 border-0 p-2">
+          <div
+            class="bg-light rounded-4 mb-3 d-flex align-items-center justify-content-center"
+            style="height: 180px"
+          >
+            <span class="text-muted fs-1">📦</span>
+          </div>
+          <div class="card-body p-2">
+            <h6 class="fw-bold mb-1">{{ product.name }}</h6>
+            <p class="text-muted small mb-2">
+              {{ product.description[:50] }}...
+            </p>
+            <div class="d-flex justify-content-between align-items-center">
+              <span class="fw-bold text-success">₹{{ product.price }}</span>
+              <button class="btn btn-dark btn-sm rounded-pill px-3">Add</button>
+            </div>
+          </div>
+        </div>
+      </div>
+      {% endfor %} {% else %}
+      <div class="col-12 text-center py-5">
+        <p class="text-muted fs-5">No products found. Start adding some!</p>
+      </div>
+      {% endif %}
+    </div>
+  </div>
+</div>
+{% endblock %}
