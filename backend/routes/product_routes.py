@@ -73,3 +73,31 @@ def manage_products():
 def product_detail(product_id):
     product = Product.query.get_or_404(product_id)
     return render_template("product_detail.html", product=product)
+
+# Delte the product
+@product_bp.route("/seller/delete-product/<int:product_id>")
+@login_required
+def delete_product(product_id):
+    if current_user.role != "seller":
+        return "Unauthorized", 403
+
+    product = Product.query.get_or_404(product_id)
+    seller = Seller.query.filter_by(user_id=current_user.id).first()
+
+    # 🛡️ SECURITY CHECK: Kya ye product isi seller ka hai?
+    if product.seller_id != seller.id:
+        flash("You can only delete your own products!", "danger")
+        return redirect(url_for('product.manage_products'))
+
+    # 1. Folder se image delete karein (taaki server pe kachra na bhare)
+    if product.image:
+        image_path = os.path.join(UPLOAD_FOLDER, product.image)
+        if os.path.exists(image_path):
+            os.remove(image_path)
+
+    # 2. Database se product delete karein
+    db.session.delete(product)
+    db.session.commit()
+
+    flash(f"Product '{product.name}' has been deleted. 🗑️", "info")
+    return redirect(url_for('product.manage_products'))
