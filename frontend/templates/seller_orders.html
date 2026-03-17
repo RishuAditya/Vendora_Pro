@@ -1,0 +1,65 @@
+{% extends "base.html" %} {% block content %}
+<div class="container mt-5">
+  <h3 class="mb-4">📦 Incoming Orders</h3>
+
+  <div class="card glass-card border-0 shadow-sm p-3">
+    <table class="table table-hover align-middle">
+      <thead class="table-dark">
+        <tr>
+          <th>Order ID</th>
+          <th>Product</th>
+          <th>Customer</th>
+          <th>Qty</th>
+          <th>Amount</th>
+          <th>Status</th>
+          <th>Action</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for item in orders %}
+        <tr>
+          <td>#{{ item.order_id }}</td>
+          <td>
+            <div class="d-flex align-items-center">
+              <img
+                src="{{ url_for('static', filename='images/products/' + item.product.image) }}"
+                width="40"
+                class="rounded me-2"
+              />
+              <span>{{ item.product.name }}</span>
+            </div>
+          </td>
+          <td>{{ item.order.user.name }}</td>
+          <td>{{ item.quantity }}</td>
+          <td class="fw-bold">₹{{ item.price_at_time * item.quantity }}</td>
+          <td>
+            <span
+              class="badge {% if item.status == 'Pending' %}bg-warning{% elif item.status == 'Shipped' %}bg-info{% else %}bg-success{% endif %}"
+            >
+              {{ item.status }}
+            </span>
+          </td>
+          <td>
+            {% if item.status == 'Pending' %}
+            <a
+              href="{{ url_for('seller.update_order_status', item_id=item.id, new_status='Shipped') }}"
+              class="btn btn-sm btn-primary"
+              >Mark Shipped</a
+            >
+            {% elif item.status == 'Shipped' %}
+            <a
+              href="{{ url_for('seller.update_order_status', item_id=item.id, new_status='Delivered') }}"
+              class="btn btn-sm btn-success"
+              >Mark Delivered</a
+            >
+            {% else %}
+            <span class="text-muted small">Completed</span>
+            {% endif %}
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

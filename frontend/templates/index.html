@@ -1,31 +1,29 @@
 {% extends "base.html" %} {% block content %}
-
 <div class="container mt-4">
+  <!-- 🔥 Hero Section -->
   <div
-    class="p-5 mb-4 bg-dark text-white rounded-5 shadow-lg position-relative overflow-hidden"
+    class="p-5 mb-5 bg-dark text-white rounded-5 shadow-lg position-relative overflow-hidden"
   >
     <div class="container-fluid py-5 position-relative" style="z-index: 2">
-      <h1 class="display-4 fw-bold">Discover Premium Products</h1>
+      <h1 class="display-4 fw-bold">Premium Marketplace</h1>
       <p class="col-md-8 fs-4 text-light-50">
-        Vendora Pro is your one-stop shop for everything. From electronics to
-        fashion, we've got you covered.
+        Buy directly from the best verified vendors. Experience quality and
+        speed with Vendora Pro.
       </p>
-
       {% if not current_user.is_authenticated %}
       <a
         href="/register"
-        class="btn btn-primary btn-lg px-5 rounded-pill shadow"
-        >Get Started</a
+        class="btn btn-info btn-lg px-5 rounded-pill shadow fw-bold"
+        >Start Shopping</a
       >
       {% else %}
       <a
         href="/{{ current_user.role }}/dashboard"
-        class="btn btn-warning btn-lg px-5 rounded-pill shadow text-dark fw-bold"
-        >Go to My Dashboard</a
+        class="btn btn-outline-info btn-lg px-5 rounded-pill shadow"
+        >Go to Dashboard</a
       >
       {% endif %}
     </div>
-
     <div
       class="position-absolute"
       style="
@@ -33,54 +31,57 @@
         right: -50px;
         width: 300px;
         height: 300px;
-        background: rgba(13, 110, 253, 0.2);
+        background: rgba(0, 255, 255, 0.1);
         filter: blur(80px);
         border-radius: 50%;
       "
     ></div>
   </div>
 
-  <div class="mt-5">
-    <h3 class="fw-bold mb-4">🛒 Featured Products</h3>
-    <div class="row">
-      {% if products %} {% for product in products %}
-      <div class="col-md-3 mb-4">
-        <div class="card glass-card shadow-sm h-100 border-0 overflow-hidden">
-          <a href="/product/{{ product.id }}">
-            <img
-              src="{{ url_for('static', filename='images/products/' + product.image) if product.image else 'https://via.placeholder.com/300' }}"
-              class="card-img-top"
-              alt="{{ product.name }}"
-              style="height: 200px; object-fit: cover"
-            />
-          </a>
+  <!-- 🛒 Featured Products Grid -->
+  <h3 class="fw-bold mb-4">✨ Featured Products</h3>
+  <div class="row">
+    {% if products %} {% for product in products %}
+    <div class="col-md-3 mb-4">
+      <div class="card glass-card h-100 border-0 shadow-sm">
+        <!-- FIXED IMAGE FRAME -->
+        <a href="/product/{{ product.id }}" class="product-img-container">
+          <img
+            src="{{ url_for('static', filename='images/products/' + product.image) if product.image else 'https://via.placeholder.com/300' }}"
+            alt="{{ product.name }}"
+          />
+        </a>
 
-          <div class="card-body p-3">
-            <h6 class="fw-bold mb-1">{{ product.name }}</h6>
-            <p class="text-muted small mb-2">
-              {{ product.description[:50] }}...
-            </p>
+        <div class="card-body">
+          <small
+            class="text-info fw-bold text-uppercase"
+            style="font-size: 0.7rem"
+            >{{ product.category.name }}</small
+          >
+          <h6 class="fw-bold mb-1 text-dark">{{ product.name }}</h6>
+          <p class="text-muted small mb-3">{{ product.description[:50] }}...</p>
 
-            <div
-              class="d-flex justify-content-between align-items-center mt-auto"
+          <div class="d-flex justify-content-between align-items-center">
+            <span class="fs-5 fw-bold text-success"
+              >₹{{ "{:,.2f}".format(product.price) }}</span
             >
-              <span class="fw-bold text-success">₹{{ product.price }}</span>
-              <a
-                href="/product/{{ product.id }}"
-                class="btn btn-outline-dark btn-sm rounded-pill px-3"
-                >View</a
-              >
-            </div>
+            <a
+              href="/product/{{ product.id }}"
+              class="btn btn-dark btn-sm rounded-pill px-3"
+              >View</a
+            >
           </div>
         </div>
       </div>
-      {% endfor %} {% else %}
-      <div class="col-12 text-center py-5">
-        <p class="text-muted fs-5">No products found. Start adding some!</p>
-      </div>
-      {% endif %}
     </div>
+    {% endfor %} {% else %}
+    <div class="col-12 text-center py-5">
+      <div class="card glass-card p-5">
+        <h4 class="text-muted">No products available right now. 📦</h4>
+        <p>Check back later or explore other categories.</p>
+      </div>
+    </div>
+    {% endif %}
   </div>
 </div>
-
 {% endblock %}

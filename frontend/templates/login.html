@@ -1,31 +1,55 @@
 {% extends "base.html" %} {% block content %}
-<div class="container d-flex justify-content-center align-items-center vh-100">
-  <div class="card shadow-lg p-4" style="width: 400px; border-radius: 15px">
-    <h3 class="text-center mb-4">Welcome Back</h3>
+<div
+  class="container d-flex justify-content-center align-items-center vh-100 animate-page"
+>
+  <div
+    class="card glass-card hover-lift shadow-lg p-4 border-0"
+    style="width: 400px; border-radius: 25px"
+  >
+    <div class="text-center mb-4">
+      <div class="fs-1 mb-2">🔐</div>
+      <h2 class="fw-bold text-dark">Welcome Back</h2>
+      <p class="text-muted small">Enter your details to access your account</p>
+    </div>
+
     <form method="POST">
       <div class="mb-3">
+        <label class="form-label small fw-bold text-secondary"
+          >Email Address</label
+        >
         <input
           type="email"
           name="email"
           class="form-control"
-          placeholder="Email Address"
+          placeholder="name@example.com"
           required
         />
       </div>
       <div class="mb-4">
+        <label class="form-label small fw-bold text-secondary">Password</label>
         <input
           type="password"
           name="password"
           class="form-control"
-          placeholder="Password"
+          placeholder="••••••••"
           required
         />
       </div>
-      <button type="submit" class="btn btn-success w-100 mb-2">Login</button>
-      <div class="text-center">
-        <small
-          >Don't have an account? <a href="/register">Register here</a></small
-        >
+
+      <button
+        type="submit"
+        class="btn btn-cool w-100 py-3 rounded-pill shadow-sm"
+      >
+        Sign In 🚀
+      </button>
+
+      <div class="text-center mt-4">
+        <span class="text-muted small"
+          >New here?
+          <a href="/register" class="text-info fw-bold text-decoration-none"
+            >Create Account</a
+          >
+        </span>
       </div>
     </form>
   </div>

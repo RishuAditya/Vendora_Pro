@@ -6,7 +6,7 @@
       <div class="card text-white bg-success mb-3 shadow">
         <div class="card-body">
           <h5 class="card-title">Total Sales</h5>
-          <p class="card-text fs-3">₹0.00</p>
+          <p class="card-text fs-3">₹{{ "%.2f"|format(total_sales) }}</p>
         </div>
       </div>
     </div>
@@ -14,7 +14,7 @@
       <div class="card text-white bg-info mb-3 shadow">
         <div class="card-body">
           <h5 class="card-title">Pending Orders</h5>
-          <p class="card-text fs-3">0</p>
+          <p class="card-text fs-3">{{ pending_orders }}</p>
         </div>
       </div>
     </div>
@@ -22,7 +22,9 @@
       <div class="card text-white bg-warning mb-3 shadow text-dark">
         <div class="card-body">
           <h5 class="card-title">Seller Score</h5>
-          <p class="card-text fs-3">100 / 100 (Bronze)</p>
+          <p class="card-text fs-3">
+            {{ seller.seller_score }} / 100 ({{ seller.badge }})
+          </p>
         </div>
       </div>
     </div>
