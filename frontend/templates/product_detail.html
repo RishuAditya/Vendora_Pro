@@ -1,0 +1,48 @@
+{% extends "base.html" %} {% block content %}
+<div class="container mt-5">
+  <div class="row bg-white p-4 rounded-5 shadow-sm">
+    <!-- Product Image -->
+    <div class="col-md-6 text-center">
+      <img
+        src="{{ url_for('static', filename='images/products/' + product.image) if product.image else 'https://via.placeholder.com/500' }}"
+        class="img-fluid rounded-4 shadow"
+        style="max-height: 500px"
+      />
+    </div>
+
+    <!-- Product Info -->
+    <div class="col-md-6 pt-4">
+      <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+          <li class="breadcrumb-item"><a href="/">Home</a></li>
+          <li class="breadcrumb-item active">{{ product.category.name }}</li>
+        </ol>
+      </nav>
+      <h1 class="display-5 fw-bold">{{ product.name }}</h1>
+      <h3 class="text-success mb-3">₹{{ product.price }}</h3>
+
+      <div class="mb-4">
+        <span
+          class="badge {{ 'bg-success' if product.stock > 0 else 'bg-danger' }}"
+        >
+          {{ 'In Stock' if product.stock > 0 else 'Out of Stock' }}
+        </span>
+        <span class="text-muted ms-2"
+          >Sold by: <strong>{{ product.seller.company_name }}</strong></span
+        >
+      </div>
+
+      <p class="lead text-muted">{{ product.description }}</p>
+
+      <div class="d-grid gap-2 d-md-flex mt-5">
+        <button class="btn btn-dark btn-lg px-5 rounded-pill">
+          🛒 Add to Cart
+        </button>
+        <button class="btn btn-outline-danger btn-lg rounded-pill">
+          ❤️ Wishlist
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

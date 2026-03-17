@@ -67,3 +67,9 @@ def manage_products():
     seller = Seller.query.filter_by(user_id=current_user.id).first()
     products = Product.query.filter_by(seller_id=seller.id).all()
     return render_template("manage_products.html", products=products)
+
+# for product detail -
+@product_bp.route("/product/<int:product_id>")
+def product_detail(product_id):
+    product = Product.query.get_or_404(product_id)
+    return render_template("product_detail.html", product=product)
