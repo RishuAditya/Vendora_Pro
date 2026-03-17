@@ -31,7 +31,8 @@ def create_app():
     from backend.routes.admin_routes import admin_bp
     from backend.routes.customer_routes import customer_bp
     from backend.routes.product_routes import product_bp
-    from backend.routes.cart_routes import cart_bp # <--- Cart Routes
+    from backend.routes.cart_routes import cart_bp 
+    from backend.routes.order_routes import order_bp
 
     app.register_blueprint(auth_bp)
     app.register_blueprint(seller_bp)
@@ -39,6 +40,7 @@ def create_app():
     app.register_blueprint(customer_bp)
     app.register_blueprint(product_bp)
     app.register_blueprint(cart_bp)
+    app.register_blueprint(order_bp)
     
 
     @app.route('/')
