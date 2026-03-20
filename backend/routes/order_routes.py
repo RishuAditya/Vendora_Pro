@@ -4,6 +4,7 @@ from backend.extensions import db
 from backend.models.cart_model import Cart
 from backend.models.order_model import Order, OrderItem
 from backend.models.product_model import Product
+from backend.models.transaction_model import Transaction # Naya import
 
 order_bp = Blueprint("order", __name__)
 
@@ -22,7 +23,7 @@ def checkout():
 
     # 3. Check Wallet Balance
     if current_user.wallet_balance < total_amount:
-        flash(f"Insufficient Balance! You need ₹{total_amount}. Please add money to your wallet.", "danger")
+        flash(f"Insufficient Balance! You need ₹{total_amount}. Please recharge your wallet.", "danger")
         return redirect(url_for('customer.dashboard'))
 
     # 4. Create Main Order
@@ -33,7 +34,7 @@ def checkout():
         payment_status="Paid"
     )
     db.session.add(new_order)
-    db.session.flush() # Order ID generate karne ke liye bina commit kiye
+    db.session.flush() # Order ID generate karne ke liye
 
     # 5. Items ko OrderItem mein shift karein aur Stock kam karein
     for item in cart_items:
@@ -41,7 +42,6 @@ def checkout():
             flash(f"Sorry, {item.product.name} is out of stock!", "danger")
             return redirect(url_for('cart.view_cart'))
         
-        # Order Item record
         order_item = OrderItem(
             order_id=new_order.id,
             product_id=item.product_id,
@@ -50,18 +50,26 @@ def checkout():
             price_at_time=item.product.price,
             status="Pending"
         )
-        # Stock update
         item.product.stock -= item.quantity
         db.session.add(order_item)
 
-    # 6. User Wallet balance deduct karein
+    # 6. Wallet balance deduct karein
     current_user.wallet_balance -= total_amount
+
+    # --- NAYA: TRANSACTION RECORD (DEBIT) ---
+    new_tx = Transaction(
+        user_id=current_user.id,
+        amount=total_amount,
+        type='Debit',
+        purpose=f'Purchased Order #{new_order.id}'
+    )
+    db.session.add(new_tx)
 
     # 7. Cart khali karein
     Cart.query.filter_by(user_id=current_user.id).delete()
 
     db.session.commit()
-    flash("Order Placed Successfully! 🎉 Money deducted from wallet.", "success")
+    flash("Order Placed Successfully! 🎉 Transaction recorded in passbook.", "success")
     return redirect(url_for('order.my_orders'))
 
 @order_bp.route("/my-orders")
@@ -69,3 +77,15 @@ def checkout():
 def my_orders():
     orders = Order.query.filter_by(user_id=current_user.id).order_by(Order.created_at.desc()).all()
     return render_template("my_orders.html", orders=orders)
+
+# --- NAYA: INVOICE VIEW ROUTE ---
+@order_bp.route("/order/invoice/<int:order_id>")
+@login_required
+def view_invoice(order_id):
+    # Order fetch karo aur check karo ki wo usi user ka hai
+    order = Order.query.get_or_404(order_id)
+    if order.user_id != current_user.id:
+        flash("Access Denied!", "danger")
+        return redirect(url_for('index'))
+    
+    return render_template("invoice.html", order=order)

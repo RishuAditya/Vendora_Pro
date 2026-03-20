@@ -1,9 +1,10 @@
 import os
+import uuid 
 from flask import Blueprint, render_template, request, redirect, url_for, flash
 from flask_login import login_required, current_user
 from werkzeug.utils import secure_filename
 from backend.extensions import db
-from backend.models.product_model import Product, Category
+from backend.models.product_model import Product, Category, ProductImage
 from backend.models.seller_model import Seller
 
 product_bp = Blueprint("product", __name__)
@@ -31,28 +32,44 @@ def add_product():
         stock = int(request.form.get("stock"))
         category_id = request.form.get("category_id")
         
-        # Image Handling logic
-        file = request.files.get('image')
-        filename = None
-
-        if file and allowed_file(file.filename):
-            filename = secure_filename(f"{current_user.id}_{file.filename}")
-            file.save(os.path.join(UPLOAD_FOLDER, filename))
-        
+        # 1. Pehle Product object banayein (image abhi khali rakhein)
         new_product = Product(
             name=name, 
             description=description, 
             price=price, 
             stock=stock, 
             category_id=category_id,
-            seller_id=seller.id,
-            image=filename # Database mein file ka naam save hoga
+            seller_id=seller.id
         )
-        
         db.session.add(new_product)
-        db.session.commit()
+        db.session.flush() 
+
+        # 2. Multiple Image Handling logic
+        files = request.files.getlist('images') # HTML mein 'images' naam hona chahiye
         
-        flash("Product added successfully with image! 📦", "success")
+        main_image_set = False
+        
+        for file in files:
+            if file and allowed_file(file.filename):
+               
+                unique_name = f"{current_user.id}_{uuid.uuid4().hex[:8]}_{secure_filename(file.filename)}"
+                file.save(os.path.join(UPLOAD_FOLDER, unique_name))
+                
+             
+                if not main_image_set:
+                    new_product.image = unique_name
+                    main_image_set = True
+                
+             
+                new_img_entry = ProductImage(
+                    product_id=new_product.id, 
+                    image_filename=unique_name
+                )
+                db.session.add(new_img_entry)
+        
+        db.session.commit() 
+        
+        flash("Product published with multiple images! 📦", "success")
         return redirect(url_for("seller.dashboard"))
 
     return render_template("add_product.html", categories=categories)

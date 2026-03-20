@@ -1,0 +1,73 @@
+/* Screen View Styling */
+.invoice-card {
+  border-radius: 20px;
+  background: #ffffff;
+  max-width: 850px;
+  margin-bottom: 50px;
+}
+
+.divider {
+  opacity: 0.1;
+}
+
+/* 🖨️ UPDATED PRINT RULES (Fixes 2nd Blank Page) */
+@media print {
+  /* 1. Hide everything except the invoice card */
+  header,
+  nav,
+  footer,
+  .navbar,
+  .d-print-none,
+  #alert-container {
+    display: none !important;
+    height: 0 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+
+  /* 2. Reset Page Margins & Height */
+  @page {
+    margin: 0.5cm;
+    size: auto;
+  }
+
+  html,
+  body {
+    height: auto !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    background: white !important;
+  }
+
+  /* 3. Force Card to be 100% and remove bottom spacing */
+  .container {
+    width: 100% !important;
+    max-width: none !important;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+
+  .invoice-card {
+    box-shadow: none !important;
+    border: none !important;
+    margin: 0 !important;
+    padding: 10px !important;
+    page-break-inside: avoid; /* Isse faltu page nahi banega */
+  }
+
+  .card-body {
+    padding: 0 !important;
+  }
+
+  /* 4. Table Style */
+  .table {
+    width: 100% !important;
+    border: 1px solid #eee !important;
+  }
+
+  /* Colors for PDF */
+  * {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+}

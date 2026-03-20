@@ -13,6 +13,7 @@ class Product(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     seller_id = db.Column(db.Integer, db.ForeignKey("sellers.id", ondelete="CASCADE"), nullable=False)
     category_id = db.Column(db.Integer, db.ForeignKey("categories.id", ondelete="CASCADE"), nullable=False)
+    extra_images = db.relationship('ProductImage', backref='product', cascade="all, delete-orphan")
     
     name = db.Column(db.String(150), nullable=False)
     description = db.Column(db.Text, nullable=False)
@@ -26,3 +27,10 @@ class Product(db.Model):
     # Connections using back_populates
     category = db.relationship("Category", back_populates="products")
     seller = db.relationship("Seller", back_populates="products")
+    # Is file ke niche ye class add karein
+class ProductImage(db.Model):
+    __tablename__ = 'product_images'
+    id = db.Column(db.Integer, primary_key=True)
+    product_id = db.Column(db.Integer, db.ForeignKey('products.id', ondelete="CASCADE"), nullable=False)
+    image_filename = db.Column(db.String(255), nullable=False)
+

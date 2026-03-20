@@ -1,0 +1,101 @@
+{% extends "base.html" %} {% block content %}
+<!-- Link separate CSS -->
+<link
+  rel="stylesheet"
+  href="{{ url_for('static', filename='css/invoice.css') }}"
+/>
+
+<div class="container mt-5 animate-page">
+  <div class="card invoice-card shadow-lg border-0 mx-auto" id="invoiceFrame">
+    <div class="card-body p-5">
+      <!-- Invoice Header -->
+      <div class="row mb-4 header-row">
+        <div class="col-sm-6">
+          <h1 class="fw-bold text-primary mb-0">VENDORA</h1>
+          <p class="text-muted small">Smart Multi-Vendor Marketplace</p>
+        </div>
+        <div class="col-sm-6 text-sm-end">
+          <h2 class="fw-bold text-dark">INVOICE</h2>
+          <p class="mb-0 text-muted">
+            Order ID: <strong>#ORD-{{ order.id }}</strong>
+          </p>
+          <p class="text-muted">
+            Date: {{ order.created_at.strftime('%d-%m-%Y') }}
+          </p>
+        </div>
+      </div>
+
+      <hr class="my-4 divider" />
+
+      <!-- Customer Details -->
+      <div class="row mb-4">
+        <div class="col-12">
+          <p class="text-muted text-uppercase small fw-bold mb-1">
+            Customer Details:
+          </p>
+          <h5 class="fw-bold text-dark mb-1">{{ order.user.name }}</h5>
+          <p class="mb-0 text-muted">{{ order.user.email }}</p>
+        </div>
+      </div>
+
+      <!-- Items Table -->
+      <div class="table-responsive">
+        <table class="table table-bordered align-middle" id="itemsTable">
+          <thead class="table-light text-uppercase small">
+            <tr>
+              <th class="py-3">Product Name</th>
+              <th class="text-center py-3">Qty</th>
+              <th class="text-end py-3">Price</th>
+              <th class="text-end py-3">Subtotal</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for item in order.items %}
+            <tr>
+              <td class="py-3">
+                <span class="fw-bold text-dark">{{ item.product.name }}</span
+                ><br />
+                <small class="text-muted"
+                  >Vendor: {{ item.seller.company_name }}</small
+                >
+              </td>
+              <td class="text-center">{{ item.quantity }}</td>
+              <td class="text-end">
+                ₹{{ "{:,.2f}".format(item.price_at_time) }}
+              </td>
+              <td class="text-end fw-bold">
+                ₹{{ "{:,.2f}".format(item.price_at_time * item.quantity) }}
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+          <tfoot class="total-footer">
+            <tr>
+              <th colspan="3" class="text-end py-3">Grand Total</th>
+              <th class="text-end py-3 text-primary fs-4">
+                ₹{{ "{:,.2f}".format(order.total_amount) }}
+              </th>
+            </tr>
+          </tfoot>
+        </table>
+      </div>
+
+      <!-- Print Actions (Hidden in PDF) -->
+      <div class="text-center mt-5 d-print-none">
+        <button
+          id="printBtn"
+          class="btn btn-dark btn-lg rounded-pill px-5 shadow-sm fw-bold"
+        >
+          <i class="bi bi-printer me-2"></i> Print / Save as PDF
+        </button>
+        <a href="/my-orders" class="btn btn-link text-muted mt-2 d-block"
+          >Return to My Orders</a
+        >
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Link separate JS -->
+<script src="{{ url_for('static', filename='js/invoice.js') }}"></script>
+{% endblock %}

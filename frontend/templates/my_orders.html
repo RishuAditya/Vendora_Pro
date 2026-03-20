@@ -18,6 +18,18 @@
       </div>
     </div>
     <hr />
+    <div class="text-end">
+      <span class="badge bg-success">Status: {{ order.payment_status }}</span
+      ><br />
+      <h4 class="text-dark mt-1">₹{{ order.total_amount }}</h4>
+      <!-- NAYA: Invoice Link Button -->
+      <a
+        href="{{ url_for('order.view_invoice', order_id=order.id) }}"
+        class="btn btn-outline-primary btn-sm rounded-pill mt-2"
+      >
+        <i class="bi bi-file-earmark-pdf"></i> View Invoice
+      </a>
+    </div>
     <div class="row">
       {% for item in order.items %}
       <div class="col-md-6 mb-2">

@@ -18,18 +18,61 @@
   </nav>
 
   <div class="row bg-white p-4 p-lg-5 rounded-5 shadow-sm border">
-    <!-- 🖼️ Product Image Section (Fixed Frame) -->
-    <div class="col-md-6 mb-4 mb-md-0">
+    <!-- Image Slider Section -->
+    <div class="col-md-6 mb-4">
       <div
-        class="bg-light rounded-5 d-flex align-items-center justify-content-center shadow-inner overflow-hidden"
-        style="height: 500px; border: 1px solid #f0f0f0"
+        id="productCarousel"
+        class="carousel slide bg-light rounded-5 shadow-sm"
+        data-bs-ride="carousel"
       >
+        <div class="carousel-inner p-4">
+          {% for img in product.extra_images %}
+          <div
+            class="carousel-item {% if loop.first %}active{% endif %} text-center"
+          >
+            <img
+              src="{{ url_for('static', filename='images/products/' + img.image_filename) }}"
+              class="img-fluid"
+              style="height: 450px; object-fit: contain"
+            />
+          </div>
+          {% endfor %}
+        </div>
+
+        <!-- Controls -->
+        <button
+          class="carousel-control-prev"
+          type="button"
+          data-bs-target="#productCarousel"
+          data-bs-slide="prev"
+        >
+          <span
+            class="carousel-control-prev-icon bg-dark rounded-circle"
+          ></span>
+        </button>
+        <button
+          class="carousel-control-next"
+          type="button"
+          data-bs-target="#productCarousel"
+          data-bs-slide="next"
+        >
+          <span
+            class="carousel-control-next-icon bg-dark rounded-circle"
+          ></span>
+        </button>
+      </div>
+
+      <!-- Thumbnails (Optional) -->
+      <div class="d-flex mt-3 gap-2 overflow-auto pb-2">
+        {% for img in product.extra_images %}
         <img
-          src="{{ url_for('static', filename='images/products/' + product.image) if product.image else 'https://via.placeholder.com/500' }}"
-          class="img-fluid"
-          style="max-height: 100%; width: auto; object-fit: contain"
-          alt="{{ product.name }}"
+          src="{{ url_for('static', filename='images/products/' + img.image_filename) }}"
+          style="width: 70px; height: 70px; object-fit: cover; cursor: pointer"
+          class="rounded border hover-lift"
+          data-bs-target="#productCarousel"
+          data-bs-slide-to="{{ loop.index0 }}"
         />
+        {% endfor %}
       </div>
     </div>
 
