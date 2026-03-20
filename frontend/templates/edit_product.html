@@ -1,0 +1,102 @@
+{% extends "base.html" %} {% block content %}
+<link
+  rel="stylesheet"
+  href="{{ url_for('static', filename='css/dashboard.css') }}"
+/>
+
+<div class="container mt-5 animate-page">
+  <div
+    class="card glass-card shadow-lg border-0 mx-auto"
+    style="max-width: 650px; border-radius: 30px"
+  >
+    <div class="card-body p-5">
+      <h2 class="fw-bold text-center mb-4">✏️ Edit Product Details</h2>
+
+      <form method="POST" enctype="multipart/form-data">
+        <div class="mb-4">
+          <label class="form-label fw-bold small">PRODUCT TITLE</label>
+          <input
+            type="text"
+            name="name"
+            class="form-control form-control-premium"
+            value="{{ product.name }}"
+            required
+          />
+        </div>
+
+        <div class="mb-4">
+          <label class="form-label fw-bold small">CATEGORY</label>
+          <select
+            name="category_id"
+            class="form-select form-control-premium"
+            required
+          >
+            {% for cat in categories %}
+            <option
+              value="{{ cat.id }}"
+              {%
+              if
+              cat.id=""
+              ="product.category_id"
+              %}selected{%
+              endif
+              %}
+            >
+              {{ cat.name }}
+            </option>
+            {% endfor %}
+          </select>
+        </div>
+
+        <div class="row g-3 mb-4">
+          <div class="col-md-6">
+            <label class="form-label fw-bold small">PRICE (INR)</label>
+            <input
+              type="number"
+              name="price"
+              step="0.01"
+              class="form-control form-control-premium"
+              value="{{ product.price }}"
+              required
+            />
+          </div>
+          <div class="col-md-6">
+            <label class="form-label fw-bold small">STOCK QUANTITY</label>
+            <input
+              type="number"
+              name="stock"
+              class="form-control form-control-premium"
+              value="{{ product.stock }}"
+              required
+            />
+          </div>
+        </div>
+
+        <div class="mb-4">
+          <label class="form-label fw-bold small">PRODUCT DESCRIPTION</label>
+          <textarea
+            name="description"
+            class="form-control form-control-premium"
+            rows="4"
+            required
+          >
+{{ product.description }}</textarea
+          >
+        </div>
+
+        <div class="d-grid gap-2">
+          <button
+            type="submit"
+            class="btn btn-dark btn-lg rounded-pill py-3 fw-bold shadow"
+          >
+            Save Changes ✨
+          </button>
+          <a href="/seller/my-products" class="btn btn-link text-muted"
+            >Go Back to Inventory</a
+          >
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}

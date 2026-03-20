@@ -74,12 +74,13 @@
             </td>
             <td class="text-center">
               <div class="btn-group shadow-sm" role="group">
-                <!-- Edit Button (Logic next step mein) -->
-                <button class="btn btn-outline-primary btn-sm px-3">
+                <a
+                  href="{{ url_for('product.edit_product', product_id=product.id) }}"
+                  class="btn btn-outline-primary btn-sm px-3"
+                >
                   Edit
-                </button>
+                </a>
 
-                <!-- ✅ UPDATED: REAL DELETE LINK WITH JS CONFIRMATION -->
                 <a
                   href="{{ url_for('product.delete_product', product_id=product.id) }}"
                   class="btn btn-outline-danger btn-sm px-3"

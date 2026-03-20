@@ -1,0 +1,86 @@
+{% extends "base.html" %} {% block content %}
+<div class="container mt-5 animate-page">
+  <div
+    class="card shadow-lg border-0 mx-auto overflow-hidden"
+    style="max-width: 450px; border-radius: 20px"
+  >
+    <!-- Blue Header like Real Banks -->
+    <div class="bg-primary p-4 text-center text-white">
+      <h4 class="mb-0">🔒 Secure Checkout</h4>
+      <small class="opacity-75">Vendora Pro Payment Service</small>
+    </div>
+
+    <div class="card-body p-4">
+      <div class="text-center mb-4">
+        <span class="text-muted d-block small">PAYABLE AMOUNT</span>
+        <h1 class="fw-bold text-dark">₹{{ amount }}</h1>
+      </div>
+
+      <!-- Fake Card Form -->
+      <form action="{{ url_for('customer.payment_success') }}" method="POST">
+        <!-- Ye hidden amount backend ko bhejne ke liye zaroori hai -->
+        <input type="hidden" name="amount" value="{{ amount }}" />
+
+        <div class="mb-3">
+          <label class="form-label small fw-bold">CARD HOLDER NAME</label>
+          <input
+            type="text"
+            class="form-control"
+            placeholder="Aapka Pura Naam"
+            required
+          />
+        </div>
+
+        <div class="mb-3">
+          <label class="form-label small fw-bold">CARD NUMBER</label>
+          <input
+            type="text"
+            class="form-control"
+            placeholder="4444 5555 6666 7777"
+            maxlength="16"
+            required
+          />
+        </div>
+
+        <div class="row">
+          <div class="col-6 mb-4">
+            <label class="form-label small fw-bold">EXPIRY</label>
+            <input
+              type="text"
+              class="form-control"
+              placeholder="MM/YY"
+              maxlength="5"
+              required
+            />
+          </div>
+          <div class="col-6 mb-4">
+            <label class="form-label small fw-bold">CVV</label>
+            <input
+              type="password"
+              class="form-control"
+              placeholder="***"
+              maxlength="3"
+              required
+            />
+          </div>
+        </div>
+
+        <button
+          type="submit"
+          class="btn btn-success btn-lg w-100 rounded-pill shadow fw-bold mb-3"
+        >
+          Confirm & Pay ₹{{ amount }}
+        </button>
+
+        <div class="text-center">
+          <a
+            href="/customer/dashboard"
+            class="text-danger small text-decoration-none"
+            >Cancel Transaction</a
+          >
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}

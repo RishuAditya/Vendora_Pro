@@ -11,7 +11,7 @@ class Order(db.Model):
     payment_status = db.Column(db.String(50), default="Pending")
     
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
-    user = db.relationship("User", backref="orders")
+    user = db.relationship("User", back_populates="orders")
 
 class OrderItem(db.Model):
     __tablename__ = "order_items"

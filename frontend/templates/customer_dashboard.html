@@ -5,21 +5,41 @@
     <span class="badge bg-primary px-3 py-2">Customer Account</span>
   </div>
 
-  <div class="row">
-    <!-- Wallet Card -->
-    <div class="col-md-4 mb-4">
-      <div class="card glass-card shadow-sm border-0 p-3 h-100">
+ <!-- Wallet Card (Modern & Attractive Version) -->
+<div class="col-md-4 mb-4">
+    <div class="card glass-card border-0 shadow-sm p-3 h-100 hover-lift">
         <div class="card-body text-center">
-          <h6 class="text-muted text-uppercase mb-3">Wallet Balance</h6>
-          <h2 class="fw-bold text-success">
-            ₹{{ "%.2f"|format(current_user.wallet_balance) }}
-          </h2>
-          <button class="btn btn-outline-success btn-sm mt-3 w-100">
-            + Add Money
-          </button>
+            <!-- Icon and Title -->
+            <div class="mb-2">
+                <span class="fs-1">💰</span>
+            </div>
+            <h6 class="text-muted text-uppercase mb-1 small fw-bold">Wallet Balance</h6>
+            <h2 class="fw-bold text-success mb-3">
+                ₹{{ "%.2f"|format(current_user.wallet_balance) }}
+            </h2>
+
+            <!-- Subtle Divider -->
+            <hr class="opacity-25 my-4">
+
+            <!-- Professional Recharge Form -->
+            <form action="{{ url_for('customer.recharge_money') }}" method="POST" class="text-start">
+                <label class="form-label small text-muted fw-bold ms-1">Quick Recharge</label>
+                <div class="input-group mb-3 shadow-sm rounded-pill overflow-hidden">
+                    <span class="input-group-text bg-white border-0 ps-3 text-success fw-bold">₹</span>
+                    <input type="number" name="amount" class="form-control border-0 ps-1" placeholder="Enter amount (e.g. 500)" required min="1" step="1">
+                </div>
+                
+                <button type="submit" class="btn btn-cool w-100 py-2 rounded-pill shadow-sm fw-bold">
+                    Add Money Now ⚡
+                </button>
+            </form>
+            
+            <p class="text-muted mt-3" style="font-size: 0.7rem;">
+                <i class="bi bi-shield-check"></i> 100% Secure Simulated Transactions
+            </p>
         </div>
-      </div>
     </div>
+</div>
 
     <!-- Orders Tracking -->
     <div class="col-md-4 mb-4">

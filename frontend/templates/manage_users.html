@@ -1,0 +1,61 @@
+{% extends "base.html" %} {% block content %}
+<div class="container mt-5 animate-page">
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <h2 class="fw-bold">👤 User Directory</h2>
+    <a
+      href="/admin/dashboard"
+      class="btn btn-outline-dark btn-sm rounded-pill px-3"
+      >Back to Panel</a
+    >
+  </div>
+
+  <div class="card glass-card border-0 shadow-sm p-4">
+    <div class="table-responsive">
+      <table class="table table-hover align-middle">
+        <thead class="table-dark">
+          <tr>
+            <th>ID</th>
+            <th>Name</th>
+            <th>Email</th>
+            <th>Role</th>
+            <th>Wallet</th>
+            <th>Action</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for user in users %}
+          <tr>
+            <td>#{{ user.id }}</td>
+            <td class="fw-bold text-dark">{{ user.name }}</td>
+            <td>{{ user.email }}</td>
+            <td>
+              <span
+                class="badge {% if user.role == 'admin' %}bg-danger{% elif user.role == 'seller' %}bg-info{% else %}bg-secondary{% endif %}"
+              >
+                {{ user.role|upper }}
+              </span>
+            </td>
+            <td class="text-success fw-bold">
+              ₹{{ "%.2f"|format(user.wallet_balance) }}
+            </td>
+            <td>
+              {% if user.role != 'admin' %}
+              <a
+                href="{{ url_for('admin.delete_user', user_id=user.id) }}"
+                class="btn btn-sm btn-outline-danger"
+                onclick="return confirmAction('Delete this user permanently?');"
+              >
+                Delete
+              </a>
+              {% else %}
+              <span class="text-muted small">Protected</span>
+              {% endif %}
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+{% endblock %}

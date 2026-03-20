@@ -1,65 +1,96 @@
 {% extends "base.html" %} {% block content %}
-<div class="container mt-5">
-  <h3 class="mb-4">📦 Incoming Orders</h3>
+<link
+  rel="stylesheet"
+  href="{{ url_for('static', filename='css/dashboard.css') }}"
+/>
 
-  <div class="card glass-card border-0 shadow-sm p-3">
-    <table class="table table-hover align-middle">
-      <thead class="table-dark">
-        <tr>
-          <th>Order ID</th>
-          <th>Product</th>
-          <th>Customer</th>
-          <th>Qty</th>
-          <th>Amount</th>
-          <th>Status</th>
-          <th>Action</th>
-        </tr>
-      </thead>
-      <tbody>
-        {% for item in orders %}
-        <tr>
-          <td>#{{ item.order_id }}</td>
-          <td>
-            <div class="d-flex align-items-center">
-              <img
-                src="{{ url_for('static', filename='images/products/' + item.product.image) }}"
-                width="40"
-                class="rounded me-2"
-              />
-              <span>{{ item.product.name }}</span>
-            </div>
-          </td>
-          <td>{{ item.order.user.name }}</td>
-          <td>{{ item.quantity }}</td>
-          <td class="fw-bold">₹{{ item.price_at_time * item.quantity }}</td>
-          <td>
-            <span
-              class="badge {% if item.status == 'Pending' %}bg-warning{% elif item.status == 'Shipped' %}bg-info{% else %}bg-success{% endif %}"
-            >
-              {{ item.status }}
-            </span>
-          </td>
-          <td>
-            {% if item.status == 'Pending' %}
-            <a
-              href="{{ url_for('seller.update_order_status', item_id=item.id, new_status='Shipped') }}"
-              class="btn btn-sm btn-primary"
-              >Mark Shipped</a
-            >
-            {% elif item.status == 'Shipped' %}
-            <a
-              href="{{ url_for('seller.update_order_status', item_id=item.id, new_status='Delivered') }}"
-              class="btn btn-sm btn-success"
-              >Mark Delivered</a
-            >
-            {% else %}
-            <span class="text-muted small">Completed</span>
-            {% endif %}
-          </td>
-        </tr>
-        {% endfor %}
-      </tbody>
-    </table>
+<div class="container mt-5 animate-page">
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <h2 class="fw-bold">📦 Sales Portal</h2>
+    <a
+      href="/seller/dashboard"
+      class="btn btn-outline-dark btn-sm rounded-pill px-3"
+      >Back to Analytics</a
+    >
+  </div>
+
+  <!-- Orders Table Card -->
+  <div
+    class="card glass-card border-0 shadow-lg p-4"
+    style="border-radius: 25px"
+  >
+    <div class="table-responsive">
+      <table class="table table-hover align-middle">
+        <thead class="table-light">
+          <tr>
+            <th class="ps-4">Order ID</th>
+            <th>Product Details</th>
+            <th>Customer</th>
+            <th>Earnings</th>
+            <th>Status</th>
+            <th class="text-center">Action</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for item in orders %}
+          <tr>
+            <td class="ps-4 fw-bold text-muted">#ORD-{{ item.order_id }}</td>
+            <td>
+              <div class="d-flex align-items-center">
+                <img
+                  src="{{ url_for('static', filename='images/products/' + item.product.image) }}"
+                  class="rounded-3 shadow-sm me-3"
+                  width="45"
+                  height="45"
+                  style="object-fit: cover"
+                />
+                <div>
+                  <div class="fw-bold text-dark">{{ item.product.name }}</div>
+                  <small class="text-muted">Qty: {{ item.quantity }}</small>
+                </div>
+              </div>
+            </td>
+            <td>{{ item.order.user.name }}</td>
+            <td class="fw-bold text-success">
+              ₹{{ "{:,.2f}".format(item.price_at_time * item.quantity) }}
+            </td>
+            <td>
+              <span
+                class="badge rounded-pill px-3 py-2 {% if item.status == 'Pending' %}bg-warning-subtle text-warning {% elif item.status == 'Shipped' %}bg-info-subtle text-info {% else %}bg-success-subtle text-success{% endif %}"
+              >
+                {{ item.status|upper }}
+              </span>
+            </td>
+            <td class="text-center">
+              {% if item.status == 'Pending' %}
+              <a
+                href="{{ url_for('seller.update_order_status', item_id=item.id, new_status='Shipped') }}"
+                class="btn btn-sm btn-dark rounded-pill px-3 shadow-sm"
+                >Ship Now</a
+              >
+              {% elif item.status == 'Shipped' %}
+              <a
+                href="{{ url_for('seller.update_order_status', item_id=item.id, new_status='Delivered') }}"
+                class="btn btn-sm btn-success rounded-pill px-3 shadow-sm"
+                onclick="return confirm('Mark as Delivered?');"
+                >Complete Order</a
+              >
+              {% else %}
+              <i class="bi bi-check-circle-fill text-success fs-5"></i>
+              {% endif %}
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+
+    {% if not orders %}
+    <div class="text-center py-5">
+      <h1 class="display-1 text-muted opacity-25">🛒</h1>
+      <p class="text-muted">No orders received yet. Good things take time!</p>
+    </div>
+    {% endif %}
   </div>
 </div>
 {% endblock %}

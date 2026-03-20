@@ -1,0 +1,69 @@
+/* --- VENDORA PRO PREMIUM UI --- */
+:root {
+  --primary-blue: #007bff;
+  --dark-bg: #1a1d20;
+  --glass: rgba(255, 255, 255, 0.8);
+}
+
+.animate-page {
+  animation: fadeInUp 0.8s ease-out;
+}
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Stat Cards with Glow */
+.stat-card-premium {
+  border-radius: 24px;
+  transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  border: 1px solid rgba(0, 0, 0, 0.05) !important;
+  position: relative;
+  overflow: hidden;
+}
+
+.stat-card-premium:hover {
+  transform: scale(1.03) translateY(-10px);
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.12) !important;
+}
+
+.bg-grad-blue {
+  background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+}
+.bg-grad-purple {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+}
+
+/* High-End Progress Bar */
+.progress-custom {
+  height: 12px;
+  background: #e9ecef;
+  border-radius: 50px;
+  overflow: hidden;
+}
+
+.progress-bar-neon {
+  background: linear-gradient(90deg, #ff9a9e 0%, #fecfef 99%, #fecfef 100%);
+  box-shadow: 0 0 15px rgba(255, 154, 158, 0.5);
+  width: 0%; /* JS will fill this */
+  transition: width 2s ease-in-out;
+}
+
+/* Form Styles */
+.form-control-premium {
+  border-radius: 12px;
+  padding: 12px 18px;
+  border: 2px solid #eee;
+  transition: 0.3s;
+}
+
+.form-control-premium:focus {
+  border-color: var(--primary-blue);
+  box-shadow: 0 0 0 4px rgba(0, 123, 255, 0.1);
+}

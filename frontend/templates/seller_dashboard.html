@@ -1,33 +1,109 @@
 {% extends "base.html" %} {% block content %}
-<div class="container mt-5">
-  <h2 class="mb-4">Seller Dashboard</h2>
-  <div class="row">
+<link
+  rel="stylesheet"
+  href="{{ url_for('static', filename='css/dashboard.css') }}"
+/>
+
+<div class="container mt-5 animate-page">
+  <div class="d-flex justify-content-between align-items-center mb-5">
+    <h2 class="fw-bold display-6">Performance Portal</h2>
+    <span
+      class="badge bg-dark px-4 py-2 rounded-pill border border-secondary shadow-sm"
+    >
+      <i class="bi bi-person-check me-2"></i> {{ current_user.name|upper }}
+    </span>
+  </div>
+
+  <!-- Metrics Grid -->
+  <div class="row g-4 mb-5">
     <div class="col-md-4">
-      <div class="card text-white bg-success mb-3 shadow">
-        <div class="card-body">
-          <h5 class="card-title">Total Sales</h5>
-          <p class="card-text fs-3">₹{{ "%.2f"|format(total_sales) }}</p>
-        </div>
+      <div
+        class="card stat-card-premium border-0 shadow-lg p-4 bg-grad-blue text-white"
+      >
+        <p class="small fw-bold opacity-75 mb-1">TOTAL REVENUE</p>
+        <h1 class="fw-bold mb-0">₹{{ "{:,.2f}".format(total_sales) }}</h1>
+        <i
+          class="bi bi-wallet2 position-absolute opacity-25"
+          style="right: 20px; bottom: 10px; font-size: 3rem"
+        ></i>
       </div>
     </div>
     <div class="col-md-4">
-      <div class="card text-white bg-info mb-3 shadow">
-        <div class="card-body">
-          <h5 class="card-title">Pending Orders</h5>
-          <p class="card-text fs-3">{{ pending_orders }}</p>
-        </div>
+      <div
+        class="card stat-card-premium border-0 shadow-lg p-4 bg-grad-purple text-white"
+      >
+        <p class="small fw-bold opacity-75 mb-1">PENDING ORDERS</p>
+        <h1 class="fw-bold mb-0">{{ pending_orders }}</h1>
+        <i
+          class="bi bi-box-seam position-absolute opacity-25"
+          style="right: 20px; bottom: 10px; font-size: 3rem"
+        ></i>
       </div>
     </div>
     <div class="col-md-4">
-      <div class="card text-white bg-warning mb-3 shadow text-dark">
-        <div class="card-body">
-          <h5 class="card-title">Seller Score</h5>
-          <p class="card-text fs-3">
-            {{ seller.seller_score }} / 100 ({{ seller.badge }})
-          </p>
+      <div class="card stat-card-premium border-0 shadow-lg p-4 bg-white">
+        <div class="d-flex justify-content-between">
+          <p class="small fw-bold text-muted mb-1">TRUST SCORE</p>
+          <span class="text-warning fw-bold">{{ current_score }}%</span>
+        </div>
+        <div class="progress-custom mt-3">
+          <!-- ✅ JS Hook: data-score logic used here -->
+          <div
+            id="trustScoreBar"
+            class="progress-bar-neon h-100"
+            data-score="{{ current_score }}"
+          ></div>
+        </div>
+        <p class="small text-muted mt-3 mb-0">
+          Calculated based on delivery rate.
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Charts & Shortcuts -->
+  <div class="row g-4">
+    <div class="col-lg-8">
+      <div class="card stat-card-premium bg-white p-4 h-100 shadow-sm border-0">
+        <h5 class="fw-bold mb-4">Growth Analytics</h5>
+        <div style="height: 320px">
+          <canvas id="sellerSalesChart"></canvas>
+        </div>
+      </div>
+    </div>
+    <div class="col-lg-4">
+      <div class="card stat-card-premium bg-light p-4 h-100 border-0 shadow-lg">
+        <h5 class="fw-bold mb-4">Quick Shortcuts</h5>
+        <div class="d-grid gap-3">
+          <a
+            href="/seller/add-product"
+            class="btn btn-primary py-3 rounded-4 shadow fw-bold"
+            >🚀 New Product</a
+          >
+          <a
+            href="/seller/my-products"
+            class="btn btn-outline-dark py-3 rounded-4 fw-bold"
+            >📋 Inventory</a
+          >
+          <a
+            href="/seller/orders"
+            class="btn btn-outline-primary py-3 rounded-4 fw-bold"
+            <a href="{{ url_for('seller.manage_orders') }}" class="btn btn-outline-primary py-3 rounded-4 fw-bold">📦 Sales Portal</a>
+          
         </div>
       </div>
     </div>
   </div>
 </div>
+
+<!-- Safe Data Transfer -->
+<script id="sales-data" type="application/json">
+  {
+      "labels": {{ sales_labels|tojson }},
+      "values": {{ sales_values|tojson }}
+  }
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="{{ url_for('static', filename='js/dashboard.js') }}"></script>
 {% endblock %}

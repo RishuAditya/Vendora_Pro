@@ -101,3 +101,33 @@ def delete_product(product_id):
 
     flash(f"Product '{product.name}' has been deleted. 🗑️", "info")
     return redirect(url_for('product.manage_products'))
+
+@product_bp.route("/seller/edit-product/<int:product_id>", methods=["GET", "POST"])
+@login_required
+def edit_product(product_id):
+    if current_user.role != "seller":
+        return "Unauthorized", 403
+    
+    product = Product.query.get_or_404(product_id)
+    categories = Category.query.all()
+
+    if request.method == "POST":
+        product.name = request.form.get("name")
+        product.description = request.form.get("description")
+        product.price = float(request.form.get("price"))
+        product.stock = int(request.form.get("stock"))
+        product.category_id = request.form.get("category_id")
+        
+        # Image Update logic (Optional - agar nayi image upload kare)
+        file = request.files.get('image')
+        if file and allowed_file(file.filename):
+            # Purani image delete karna (Optional but good practice)
+            filename = secure_filename(f"{current_user.id}_{file.filename}")
+            file.save(os.path.join(UPLOAD_FOLDER, filename))
+            product.image = filename
+        
+        db.session.commit()
+        flash(f"Product '{product.name}' updated successfully!", "success")
+        return redirect(url_for('product.manage_products'))
+
+    return render_template("edit_product.html", product=product, categories=categories)

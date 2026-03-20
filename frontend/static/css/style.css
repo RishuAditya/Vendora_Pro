@@ -155,3 +155,27 @@ body {
   letter-spacing: 1px;
   box-shadow: 0 5px 15px rgba(13, 202, 240, 0.4);
 }
+
+.input-group-text {
+  border-radius: 12px 0 0 12px;
+}
+.form-select {
+  border-radius: 12px;
+  padding: 12px;
+}
+/* Category Pill Style (Optional for later) */
+.category-pill {
+  padding: 8px 20px;
+  border-radius: 50px;
+  background: white;
+  border: 1px solid #ddd;
+  color: #555;
+  text-decoration: none;
+  transition: all 0.3s ease;
+}
+.category-pill:hover,
+.category-pill.active {
+  background: #0dcaf0;
+  color: white;
+  border-color: #0dcaf0;
+}

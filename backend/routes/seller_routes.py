@@ -12,12 +12,29 @@ def dashboard():
     if current_user.role != "seller":
         return "Access Denied", 403
     
+    # 1. Sabse pehle seller fetch karo
     seller = Seller.query.filter_by(user_id=current_user.id).first()
-    # Analytics for dashboard
+    
+    # 2. Agar seller nahi mila toh exit kar jao (Fixes UnboundLocalError)
+    if not seller:
+        flash("Seller profile not found! Please contact admin.", "danger")
+        return redirect(url_for('index'))
+
+    # 3. Baaki ka calculation
     total_sales = db.session.query(db.func.sum(OrderItem.price_at_time * OrderItem.quantity)).filter_by(seller_id=seller.id, status='Delivered').scalar() or 0
     pending_orders = OrderItem.query.filter_by(seller_id=seller.id, status='Pending').count()
+    current_score = seller.seller_score if seller.seller_score is not None else 100
     
-    return render_template("seller_dashboard.html", total_sales=total_sales, pending_orders=pending_orders, seller=seller)
+    sales_labels = ["Jan", "Feb", "Mar", "Apr", "May", "Current"]
+    sales_values = [15000, 28000, 22000, 45000, 32000, total_sales] 
+
+    return render_template("seller_dashboard.html", 
+                           total_sales=total_sales, 
+                           pending_orders=pending_orders, 
+                           seller=seller,
+                           current_score=current_score,
+                           sales_labels=sales_labels,
+                           sales_values=sales_values)
 
 @seller_bp.route("/orders")
 @login_required
@@ -25,22 +42,28 @@ def manage_orders():
     if current_user.role != "seller":
         return "Access Denied", 403
     
+    # Same Fix here: Pehle seller fetch karo
     seller = Seller.query.filter_by(user_id=current_user.id).first()
-    # Sirf is Seller ke products wale orders uthao
-    orders_received = OrderItem.query.filter_by(seller_id=seller.id).order_by(OrderItem.id.desc()).all()
     
+    if not seller:
+        flash("Seller profile not found!", "danger")
+        return redirect(url_for('index'))
+
+    orders_received = OrderItem.query.filter_by(seller_id=seller.id).order_by(OrderItem.id.desc()).all()
     return render_template("seller_orders.html", orders=orders_received)
 
 @seller_bp.route("/update-status/<int:item_id>/<string:new_status>")
 @login_required
 def update_order_status(item_id, new_status):
-    item = OrderItem.query.get_or_404(item_id)
+    # Security: Pehle check karo action lene wala seller valid hai ya nahi
     seller = Seller.query.filter_by(user_id=current_user.id).first()
-    
-    # Check if this order belongs to this seller
+    if not seller:
+        return "Unauthorized", 403
+
+    item = OrderItem.query.get_or_404(item_id)
     if item.seller_id == seller.id:
         item.status = new_status
         db.session.commit()
-        flash(f"Order status updated to {new_status}!", "success")
+        flash(f"Order status updated to {new_status}! 🚀", "success")
     
     return redirect(url_for('seller.manage_orders'))

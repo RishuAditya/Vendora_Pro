@@ -45,8 +45,26 @@ def create_app():
 
     @app.route('/')
     def index():
-        from backend.models.product_model import Product
-        products = Product.query.all()
-        return render_template("index.html", products=products)
+        from backend.models.product_model import Product, Category
+        from flask import request
 
+        # Get search query and category from URL (e.g., /?search=iphone&category=1)
+        search_query = request.args.get('search', '')
+        category_id = request.args.get('category', '')
+
+        # Base Query: Sirf active products dikhao
+        query = Product.query.filter_by(is_active=True)
+
+        # Filter by Search Keyword
+        if search_query:
+            query = query.filter(Product.name.ilike(f'%{search_query}%'))
+        
+        # Filter by Category
+        if category_id:
+            query = query.filter_by(category_id=category_id)
+
+        products = query.order_by(Product.created_at.desc()).all()
+        categories = Category.query.all()
+
+        return render_template("index.html", products=products, categories=categories)
     return app
