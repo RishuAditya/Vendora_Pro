@@ -5,7 +5,7 @@ class Category(db.Model):
     __tablename__ = "categories"
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(100), nullable=False)
-    # Category se products tak pahunchne ke liye
+ 
     products = db.relationship("Product", back_populates="category")
 
 class Product(db.Model):
@@ -13,7 +13,8 @@ class Product(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     seller_id = db.Column(db.Integer, db.ForeignKey("sellers.id", ondelete="CASCADE"), nullable=False)
     category_id = db.Column(db.Integer, db.ForeignKey("categories.id", ondelete="CASCADE"), nullable=False)
-    extra_images = db.relationship('ProductImage', backref='product', cascade="all, delete-orphan")
+
+    
     
     name = db.Column(db.String(150), nullable=False)
     description = db.Column(db.Text, nullable=False)
@@ -24,10 +25,19 @@ class Product(db.Model):
     views = db.Column(db.Integer, default=0)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
-    # Connections using back_populates
+    
+    brand = db.Column(db.String(100))
+    weight_qty = db.Column(db.String(50))
+    warranty = db.Column(db.String(100))
+    specifications = db.Column(db.Text) 
+    expiry_date = db.Column(db.Date, nullable=True)
+    is_food = db.Column(db.Boolean, default=False)
+
     category = db.relationship("Category", back_populates="products")
     seller = db.relationship("Seller", back_populates="products")
-    # Is file ke niche ye class add karein
+    extra_images = db.relationship('ProductImage', backref='product', cascade="all, delete-orphan")
+    reviews = db.relationship('Review', backref='product_info', lazy=True)
+   
 class ProductImage(db.Model):
     __tablename__ = 'product_images'
     id = db.Column(db.Integer, primary_key=True)

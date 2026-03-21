@@ -10,14 +10,28 @@ class Order(db.Model):
     payment_status = db.Column(db.String(50), default="Paid")
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
-    # User ke sath connection
+    invoice_no = db.Column(db.String(100), unique=True)
+
+    shipping_address = db.Column(db.Text)
+
+    payment_mode = db.Column(db.String(50)) 
+
+    customer_name_snapshot = db.Column(db.String(100))
+
+    customer_email_snapshot = db.Column(db.String(100))
+
+  
     user = db.relationship("User", back_populates="orders")
 
 class OrderItem(db.Model):
     __tablename__ = "order_items"
+
     id = db.Column(db.Integer, primary_key=True)
+
     order_id = db.Column(db.Integer, db.ForeignKey("orders.id", ondelete="CASCADE"), nullable=False)
+
     product_id = db.Column(db.Integer, db.ForeignKey("products.id", ondelete="CASCADE"), nullable=False)
+
     seller_id = db.Column(db.Integer, db.ForeignKey("sellers.id", ondelete="CASCADE"), nullable=False)
     
     quantity = db.Column(db.Integer, nullable=False)
@@ -26,5 +40,5 @@ class OrderItem(db.Model):
     
     order = db.relationship("Order", backref="items")
     product = db.relationship("Product")
-    # ✅ NAYA: Seller ke sath connection define kiya
+
     seller = db.relationship("Seller")

@@ -1,82 +1,79 @@
 {% extends "base.html" %} {% block content %}
-<link
-  rel="stylesheet"
-  href="{{ url_for('static', filename='css/dashboard.css') }}"
-/>
-
 <div class="container mt-5 animate-page">
   <div
     class="card glass-card shadow-lg border-0 mx-auto"
     style="max-width: 650px; border-radius: 30px"
   >
     <div class="card-body p-5">
-      <h2 class="fw-bold text-center mb-4">✏️ Edit Product Details</h2>
+      <h2 class="fw-bold text-center mb-4 text-dark">✏️ Edit Product</h2>
 
       <form method="POST" enctype="multipart/form-data">
         <div class="mb-4">
-          <label class="form-label fw-bold small">PRODUCT TITLE</label>
+          <label class="form-label fw-bold small text-muted"
+            >PRODUCT TITLE</label
+          >
           <input
             type="text"
             name="name"
-            class="form-control form-control-premium"
+            class="form-control form-control-lg border-2"
             value="{{ product.name }}"
             required
           />
         </div>
 
         <div class="mb-4">
-          <label class="form-label fw-bold small">CATEGORY</label>
+          <label class="form-label fw-bold small text-muted">CATEGORY</label>
           <select
             name="category_id"
-            class="form-select form-control-premium"
+            class="form-select form-control-lg border-2"
             required
           >
-            {% for cat in categories %}
-            <option
-              value="{{ cat.id }}"
-              {%
-              if
-              cat.id=""
-              ="product.category_id"
-              %}selected{%
-              endif
-              %}
-            >
-              {{ cat.name }}
-            </option>
-            {% endfor %}
+            {% for cat in categories %} {% if cat.id == product.category_id %}
+            <option value="{{ cat.id }}" selected>{{ cat.name }}</option>
+            {% else %}
+            <option value="{{ cat.id }}">{{ cat.name }}</option>
+            {% endif %} {% endfor %}
           </select>
         </div>
 
         <div class="row g-3 mb-4">
           <div class="col-md-6">
-            <label class="form-label fw-bold small">PRICE (INR)</label>
-            <input
-              type="number"
-              name="price"
-              step="0.01"
-              class="form-control form-control-premium"
-              value="{{ product.price }}"
-              required
-            />
+            <label class="form-label fw-bold small text-muted"
+              >PRICE (INR)</label
+            >
+            <div class="input-group">
+              <span class="input-group-text bg-light fw-bold">₹</span>
+              <input
+                type="number"
+                name="price"
+                step="0.01"
+                class="form-control form-control-lg border-2"
+                value="{{ product.price }}"
+                required
+              />
+            </div>
           </div>
+
           <div class="col-md-6">
-            <label class="form-label fw-bold small">STOCK QUANTITY</label>
+            <label class="form-label fw-bold small text-muted"
+              >STOCK QUANTITY</label
+            >
             <input
               type="number"
               name="stock"
-              class="form-control form-control-premium"
+              class="form-control form-control-lg border-2"
               value="{{ product.stock }}"
               required
             />
           </div>
         </div>
 
+        <!-- Description -->
         <div class="mb-4">
-          <label class="form-label fw-bold small">PRODUCT DESCRIPTION</label>
+          <label class="form-label fw-bold small text-muted">DESCRIPTION</label>
           <textarea
             name="description"
-            class="form-control form-control-premium"
+            class="form-control border-2"
             rows="4"
             required
           >
@@ -84,16 +81,20 @@
           >
         </div>
 
+        <!-- Buttons -->
         <div class="d-grid gap-2">
           <button
             type="submit"
             class="btn btn-dark btn-lg rounded-pill py-3 fw-bold shadow"
           >
-            Save Changes ✨
+            Update Inventory ✨
           </button>
-          <a href="/seller/my-products" class="btn btn-link text-muted"
-            >Go Back to Inventory</a
+          <a
+            href="/seller/my-products"
+            class="btn btn-link text-decoration-none text-muted mt-2"
           >
+            Cancel and Go Back
+          </a>
         </div>
       </form>
     </div>
