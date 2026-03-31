@@ -1,0 +1,234 @@
+{% extends "base.html" %} {% block content %}
+<div class="container mt-5 animate-page">
+  <form action="{{ url_for('order.process_checkout') }}" method="POST">
+    <div class="row">
+      <div class="col-md-8 mb-4">
+        <!-- 🚩 SECTION 1: DELIVERY -->
+        <div
+          class="card glass-card border-0 shadow-lg p-4 mb-4"
+          style="border-radius: 20px"
+        >
+          <h4 class="fw-bold mb-4 text-dark">
+            <i class="bi bi-geo-alt-fill text-danger"></i> 1. Delivery Details
+          </h4>
+          <div class="row g-3">
+            <div class="col-md-6">
+              <label class="small fw-bold text-muted">RECIPIENT NAME</label>
+              <input
+                type="text"
+                name="shipping_name"
+                class="form-control border-2"
+                value="{{ current_user.name }}"
+                required
+              />
+            </div>
+            <div class="col-md-6">
+              <label class="small fw-bold text-muted">CONTACT NUMBER</label>
+              <input
+                type="text"
+                name="shipping_phone"
+                class="form-control border-2"
+                placeholder="10 Digit Mobile No"
+                required
+              />
+            </div>
+            <div class="col-12">
+              <label class="small fw-bold text-muted"
+                >FULL SHIPPING ADDRESS</label
+              >
+              <textarea
+                name="shipping_address"
+                class="form-control border-2"
+                rows="2"
+                required
+              >
+{{ current_user.full_address }}</textarea
+              >
+            </div>
+          </div>
+        </div>
+
+        <!-- 💳 SECTION 2: PAYMENT -->
+        <div
+          class="card glass-card border-0 shadow-lg p-4"
+          style="border-radius: 20px"
+        >
+          <h4 class="fw-bold mb-4 text-dark">
+            <i class="bi bi-credit-card-2-back-fill text-primary"></i> 2.
+            Payment Method
+          </h4>
+          <div class="payment-option p-3 border rounded-4 mb-3 hover-lift">
+            <div class="form-check">
+              <input
+                class="form-check-input mt-2"
+                type="radio"
+                name="pay_mode"
+                value="wallet"
+                checked
+              />
+              <label class="form-check-label ms-2" for="pW"
+                ><span class="fw-bold d-block"
+                  >Pay with Wallet (₹{{
+                  "%.2f"|format(current_user.wallet_balance) }})</span
+                ></label
+              >
+            </div>
+          </div>
+          <div class="payment-option p-3 border rounded-4 mb-3 hover-lift">
+            <div class="form-check">
+              <input
+                class="form-check-input mt-2"
+                type="radio"
+                name="pay_mode"
+                value="card"
+              /><label class="form-check-label ms-2" for="pC"
+                ><span class="fw-bold d-block">Credit / Debit Card</span></label
+              >
+            </div>
+          </div>
+          <!-- Card Details Form -->
+          <div
+            id="cardDetailsForm"
+            style="display: none"
+            class="p-4 bg-light rounded-4 border mt-3"
+          >
+            <h6 class="fw-bold mb-3 text-muted">Card Information</h6>
+            <select
+              name="saved_card_id"
+              class="form-select border-2 mb-3 rounded-3"
+              id="savedCardSelect"
+            >
+              <option value="new">-- Use a New Card --</option>
+              {% for card in saved_cards %}
+              <option value="{{ card.id }}">
+                💳 Visa Ending in {{ card.card_last_four }}
+              </option>
+              {% endfor %}
+            </select>
+            <input
+              type="text"
+              name="card_number"
+              class="form-control mb-2 border-2"
+              placeholder="16 Digit Card No"
+              maxlength="16"
+            />
+            <div class="row g-2">
+              <div class="col-6">
+                <input
+                  type="text"
+                  name="expiry"
+                  class="form-control border-2"
+                  placeholder="MM/YY"
+                />
+              </div>
+              <div class="col-6">
+                <input
+                  type="password"
+                  class="form-control border-2"
+                  placeholder="CVV"
+                />
+              </div>
+            </div>
+            <div class="form-check mt-3">
+              <input
+                class="form-check-input"
+                type="checkbox"
+                name="save_card"
+                id="sc"
+              /><label class="form-check-label small" for="sc"
+                >Save card for future</label
+              >
+            </div>
+          </div>
+          <div class="payment-option p-3 border rounded-4 mb-3 hover-lift">
+            <div class="form-check">
+              <input
+                class="form-check-input mt-2"
+                type="radio"
+                name="pay_mode"
+                value="cod"
+              /><label class="form-check-label ms-2" for="pD"
+                ><span class="fw-bold d-block"
+                  >Cash on Delivery (COD)</span
+                ></label
+              >
+            </div>
+          </div>
+        </div>
+        <button
+          type="submit"
+          class="btn btn-dark btn-lg w-100 rounded-pill py-3 fw-bold shadow mt-4"
+        >
+          Confirm & Place Order 🚀
+        </button>
+      </div>
+
+      <!-- Right Side: Summary & Coupon -->
+      <div class="col-md-4">
+        <div class="card glass-card border-0 shadow-sm p-4 mb-4">
+          <h5 class="fw-bold mb-3">
+            <i class="bi bi-tag text-primary"></i> Apply Coupon
+          </h5>
+          <form
+            action="{{ url_for('order.apply_coupon') }}"
+            method="POST"
+            class="d-flex gap-2"
+          >
+            <input
+              type="text"
+              name="coupon_code"
+              class="form-control rounded-pill border-2"
+              placeholder="Code..."
+              required
+            />
+            <button type="submit" class="btn btn-dark rounded-pill px-3">
+              Apply
+            </button>
+          </form>
+          <div class="mt-4 border-top pt-3">
+            <small class="fw-bold text-muted text-uppercase d-block mb-2"
+              >Offers:</small
+            >
+            {% for cp in offers %}
+            <div
+              class="p-2 border rounded-3 mb-2 bg-light small d-flex justify-content-between align-items-center"
+            >
+              <code>{{ cp.code }}</code
+              ><span>Min: ₹{{ cp.min_purchase|int }}</span>
+            </div>
+            {% endfor %}
+          </div>
+        </div>
+        <div class="card glass-card border-0 shadow-sm p-4">
+          <h5 class="fw-bold mb-3">Order Total</h5>
+          <div class="d-flex justify-content-between mb-2">
+            <span>Subtotal:</span
+            ><strong>₹{{ "{:,.2f}".format(total) }}</strong>
+          </div>
+          {% if discount > 0 %}
+          <div class="d-flex justify-content-between mb-2 text-danger">
+            <span>Discount:</span
+            ><strong>- ₹{{ "{:,.2f}".format(discount) }}</strong>
+          </div>
+          {% endif %}
+          <hr />
+          <div
+            class="d-flex justify-content-between mb-2 fs-5 fw-bold text-primary"
+          >
+            <span>Payable:</span
+            ><span>₹{{ "{:,.2f}".format(final_total) }}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </form>
+</div>
+<script>
+  document.querySelectorAll('input[name="pay_mode"]').forEach((radio) => {
+    radio.addEventListener("change", () => {
+      document.getElementById("cardDetailsForm").style.display =
+        radio.value === "card" || radio.value === "hybrid" ? "block" : "none";
+    });
+  });
+</script>
+{% endblock %}

@@ -1,0 +1,176 @@
+{% extends "base.html" %} {% block content %}
+<div class="container mt-5 animate-page">
+  <div class="row">
+    <!-- 👤 LEFT SIDE: Mini Identity Card -->
+    <div class="col-md-4 mb-4">
+      <div
+        class="card glass-card border-0 shadow-lg text-center p-4"
+        style="border-radius: 30px"
+      >
+        <img
+          src="{{ url_for('static', filename='images/' + user.profile_pic) }}"
+          class="rounded-circle shadow mx-auto mb-3 border border-4 border-white"
+          style="width: 130px; height: 130px; object-fit: cover"
+        />
+        <h4 class="fw-bold text-dark mb-0">{{ user.name }}</h4>
+        <span
+          class="badge rounded-pill bg-primary-subtle text-primary px-3 mb-3"
+          >{{ user.role|upper }}</span
+        >
+        <div class="bg-light rounded-4 p-3 mt-2 text-start">
+          <div class="d-flex justify-content-between small text-muted">
+            <span>Wallet:</span>
+            <span class="fw-bold text-success"
+              >₹{{ "%.2f"|format(user.wallet_balance) }}</span
+            >
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ⚙️ RIGHT SIDE: Tabbed Interface -->
+    <div class="col-md-8">
+      <div
+        class="card glass-card border-0 shadow-lg p-4"
+        style="border-radius: 30px"
+      >
+        <!-- Tab Navigation -->
+        <ul
+          class="nav nav-pills mb-4 bg-light p-2 rounded-pill justify-content-center"
+          id="profileTab"
+          role="tablist"
+        >
+          <li class="nav-item">
+            <button
+              class="nav-link active rounded-pill px-4"
+              data-bs-toggle="tab"
+              data-bs-target="#overview"
+              type="button"
+            >
+              Info
+            </button>
+          </li>
+          <li class="nav-item">
+            <button
+              class="nav-link rounded-pill px-4"
+              data-bs-toggle="tab"
+              data-bs-target="#settings"
+              type="button"
+            >
+              Settings
+            </button>
+          </li>
+          <li class="nav-item">
+            <button
+              class="nav-link rounded-pill px-4"
+              data-bs-toggle="tab"
+              data-bs-target="#security"
+              type="button"
+            >
+              Security
+            </button>
+          </li>
+        </ul>
+
+        <div class="tab-content" id="profileTabContent">
+          <!-- 1. OVERVIEW -->
+          <div class="tab-pane fade show active" id="overview" role="tabpanel">
+            <h5 class="fw-bold mb-4">Account Overview</h5>
+            <div class="row g-4 text-start">
+              <div class="col-6">
+                <label class="text-muted small d-block">NAME</label>
+                <p class="fw-bold">{{ user.name }}</p>
+              </div>
+              <div class="col-6">
+                <label class="text-muted small d-block">EMAIL</label>
+                <p class="fw-bold">{{ user.email }}</p>
+              </div>
+              <div class="col-12">
+                <label class="text-muted small d-block">ADDRESS</label>
+                <p class="fw-bold">{{ user.full_address }}</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- 2. SETTINGS -->
+          <div class="tab-pane fade" id="settings" role="tabpanel">
+            <h5 class="fw-bold mb-4">Edit Profile</h5>
+            <form method="POST" enctype="multipart/form-data">
+              <input
+                type="text"
+                name="name"
+                class="form-control mb-3"
+                value="{{ user.name }}"
+                placeholder="Name"
+              />
+              <input
+                type="number"
+                name="age"
+                class="form-control mb-3"
+                value="{{ user.age }}"
+                placeholder="Age"
+              />
+              <textarea name="address" class="form-control mb-3" rows="2">
+{{ user.full_address }}</textarea
+              >
+              <label class="small fw-bold">Change Profile Pic</label>
+              <input type="file" name="profile_pic" class="form-control mb-4" />
+              <button
+                type="submit"
+                class="btn btn-cool rounded-pill w-100 py-2 shadow"
+              >
+                Update Profile
+              </button>
+            </form>
+          </div>
+
+          <!-- 3. SECURITY (NEW TAB) -->
+          <div class="tab-pane fade" id="security" role="tabpanel">
+            <h5 class="fw-bold mb-4 text-danger">🛡️ Change Password</h5>
+            <form action="{{ url_for('auth.change_password') }}" method="POST">
+              <div class="mb-3">
+                <label class="form-label small fw-bold">Current Password</label>
+                <input
+                  type="password"
+                  name="old_password"
+                  class="form-control"
+                  placeholder="••••••••"
+                  required
+                />
+              </div>
+              <div class="mb-3">
+                <label class="form-label small fw-bold">New Password</label>
+                <input
+                  type="password"
+                  name="new_password"
+                  class="form-control"
+                  placeholder="••••••••"
+                  required
+                />
+              </div>
+              <div class="mb-4">
+                <label class="form-label small fw-bold"
+                  >Confirm New Password</label
+                >
+                <input
+                  type="password"
+                  name="confirm_password"
+                  class="form-control"
+                  placeholder="••••••••"
+                  required
+                />
+              </div>
+              <button
+                type="submit"
+                class="btn btn-danger rounded-pill w-100 py-2 shadow fw-bold"
+              >
+                Update Security ✨
+              </button>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

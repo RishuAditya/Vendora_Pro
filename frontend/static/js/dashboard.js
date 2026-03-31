@@ -1,52 +1,42 @@
 document.addEventListener("DOMContentLoaded", function () {
-  // 1. Data Parsing Safely
-  const salesDataEl = document.getElementById("sales-data");
-  if (!salesDataEl) return;
-  const chartData = JSON.parse(salesDataEl.textContent);
-
-  // 2. Neon Progress Bar Animation (Anti-Error Fix)
-  const progressBar = document.getElementById("trustScoreBar");
-  if (progressBar) {
-    const score = progressBar.getAttribute("data-score");
-    // Setting width via JS to bypass Jinja Syntax Errors
+  // 1. Progress Bar Logic
+  const scoreBar = document.getElementById("trustScoreBar");
+  if (scoreBar) {
+    const score = scoreBar.getAttribute("data-score");
     setTimeout(() => {
-      progressBar.style.width = score + "%";
-    }, 500);
+      scoreBar.style.width = score + "%";
+    }, 300);
   }
 
-  // 3. Chart.js Initialization
-  const ctx = document.getElementById("sellerSalesChart").getContext("2d");
-  const gradient = ctx.createLinearGradient(0, 0, 0, 400);
-  gradient.addColorStop(0, "rgba(79, 172, 254, 0.4)");
-  gradient.addColorStop(1, "rgba(79, 172, 254, 0)");
+  // 2. Chart.js Logic (The REAL FIX)
+  const ctx = document.getElementById("sellerSalesChart");
+  if (ctx) {
+    const labels = JSON.parse(ctx.getAttribute("data-labels"));
+    const values = JSON.parse(ctx.getAttribute("data-values"));
 
-  new Chart(ctx, {
-    type: "line",
-    data: {
-      labels: chartData.labels,
-      datasets: [
-        {
-          label: "Earnings (₹)",
-          data: chartData.values,
-          borderColor: "#4facfe",
-          borderWidth: 4,
-          pointBackgroundColor: "#fff",
-          pointBorderColor: "#4facfe",
-          pointRadius: 6,
-          tension: 0.4,
-          fill: true,
-          backgroundColor: gradient,
-        },
-      ],
-    },
-    options: {
-      responsive: true,
-      maintainAspectRatio: false,
-      plugins: { legend: { display: false } },
-      scales: {
-        y: { beginAtZero: true, grid: { color: "rgba(0,0,0,0.03)" } },
-        x: { grid: { display: false } },
+    new Chart(ctx.getContext("2d"), {
+      type: "line",
+      data: {
+        labels: labels,
+        datasets: [
+          {
+            label: "Daily Revenue",
+            data: values,
+            borderColor: "#007bff",
+            borderWidth: 4,
+            fill: true,
+            backgroundColor: "rgba(0, 123, 255, 0.1)",
+            tension: 0.4,
+            pointRadius: 4,
+          },
+        ],
       },
-    },
-  });
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: { legend: { display: false } },
+        scales: { y: { beginAtZero: true }, x: { grid: { display: false } } },
+      },
+    });
+  }
 });

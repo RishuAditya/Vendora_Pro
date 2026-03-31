@@ -1,0 +1,96 @@
+{% extends "base.html" %} {% block content %}
+<link
+  rel="stylesheet"
+  href="{{ url_for('static', filename='css/statement.css') }}"
+/>
+
+<div class="container mt-5 mb-5 animate-page">
+  <div
+    class="card statement-card border-0 shadow-lg mx-auto"
+    style="max-width: 900px"
+  >
+    <div class="card-body p-5">
+      <!-- Header Section -->
+      <div
+        class="d-flex justify-content-between align-items-center mb-4 border-bottom pb-3"
+      >
+        <div>
+          <h2 class="fw-bold text-primary mb-0">VENDORA PRO</h2>
+          <p class="text-muted small">Official Financial Statement</p>
+        </div>
+        <div class="text-end">
+          <h4 class="fw-bold mb-0">E-STATEMENT</h4>
+          <span class="badge bg-dark rounded-pill px-3"
+            >Period: {{ filter_days|upper if filter_days != 'all' else
+            'LIFETIME' }}</span
+          >
+        </div>
+      </div>
+
+      <!-- User Info -->
+      <div class="row mb-4">
+        <div class="col-6">
+          <label class="text-muted small fw-bold">ACCOUNT HOLDER</label>
+          <h5 class="fw-bold">{{ current_user.name }}</h5>
+          <p class="small text-muted mb-0">{{ current_user.email }}</p>
+        </div>
+        <div class="col-6 text-end">
+          <label class="text-muted small fw-bold">GENERATED ON</label>
+          <p class="fw-bold">{{ report_date }}</p>
+        </div>
+      </div>
+
+      <!-- Passbook Table -->
+      <div class="table-responsive">
+        <table class="table table-bordered align-middle">
+          <thead class="table-light text-uppercase small fw-bold">
+            <tr>
+              <th>Date</th>
+              <th>Description / Purpose</th>
+              <th class="text-end">Credit (In)</th>
+              <th class="text-end">Debit (Out)</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for tx in transactions %}
+            <tr>
+              <td class="small">{{ tx.created_at.strftime('%d-%m-%Y') }}</td>
+              <td>{{ tx.purpose }}</td>
+              <td class="text-end text-success fw-bold">
+                {{ "₹%.2f"|format(tx.amount) if tx.type == 'Credit' else '-' }}
+              </td>
+              <td class="text-end text-danger fw-bold">
+                {{ "₹%.2f"|format(tx.amount) if tx.type == 'Debit' else '-' }}
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Total Balance Footer -->
+      <div class="mt-4 p-3 bg-light rounded-4 border text-end">
+        <span class="text-muted fw-bold me-3">CLOSING WALLET BALANCE:</span>
+        <h3 class="d-inline fw-bold text-dark">
+          ₹{{ "%.2f"|format(current_user.wallet_balance) }}
+        </h3>
+      </div>
+
+      <!-- Action Buttons (Hidden in print) -->
+      <div class="mt-5 text-center d-print-none">
+        <button
+          onclick="window.print()"
+          class="btn btn-dark btn-lg rounded-pill px-5 shadow"
+        >
+          <i class="bi bi-download me-2"></i> Download as PDF
+        </button>
+        <a
+          href="javascript:history.back()"
+          class="btn btn-link text-muted d-block mt-3"
+          >Go Back</a
+        >
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

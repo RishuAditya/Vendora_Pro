@@ -6,15 +6,14 @@
 
 <div class="container mt-5 animate-page">
   <div class="d-flex justify-content-between align-items-center mb-4">
-    <h2 class="fw-bold">📦 Sales Portal</h2>
+    <h2 class="fw-bold">📦 Sales Portal (Order Management)</h2>
     <a
       href="/seller/dashboard"
       class="btn btn-outline-dark btn-sm rounded-pill px-3"
-      >Back to Analytics</a
+      >Back to Tower</a
     >
   </div>
 
-  <!-- Orders Table Card -->
   <div
     class="card glass-card border-0 shadow-lg p-4"
     style="border-radius: 25px"
@@ -45,38 +44,73 @@
                   style="object-fit: cover"
                 />
                 <div>
-                  <div class="fw-bold text-dark">{{ item.product.name }}</div>
-                  <small class="text-muted">Qty: {{ item.quantity }}</small>
+                  <div
+                    class="fw-bold text-dark text-truncate"
+                    style="max-width: 150px"
+                  >
+                    {{ item.product.name }}
+                  </div>
+                  <small class="text-muted"
+                    >Qty: {{ item.quantity }} | {{ item.variant or 'Standard'
+                    }}</small
+                  >
                 </div>
               </div>
             </td>
-            <td>{{ item.order.user.name }}</td>
+            <td>
+              <div class="fw-bold small">{{ item.order.user.name }}</div>
+              <small class="text-muted">{{ item.order.user.email }}</small>
+            </td>
             <td class="fw-bold text-success">
               ₹{{ "{:,.2f}".format(item.price_at_time * item.quantity) }}
             </td>
             <td>
               <span
-                class="badge rounded-pill px-3 py-2 {% if item.status == 'Pending' %}bg-warning-subtle text-warning {% elif item.status == 'Shipped' %}bg-info-subtle text-info {% else %}bg-success-subtle text-success{% endif %}"
+                class="badge rounded-pill px-3 py-2 {% if item.status == 'Pending' %}bg-warning-subtle text-warning {% elif item.status == 'Completed' %}bg-success-subtle text-success {% elif item.status == 'Cancelled' %}bg-danger-subtle text-danger {% else %}bg-info-subtle text-info{% endif %}"
               >
                 {{ item.status|upper }}
               </span>
             </td>
             <td class="text-center">
-              {% if item.status == 'Pending' %}
-              <a
-                href="{{ url_for('seller.update_order_status', item_id=item.id, new_status='Shipped') }}"
-                class="btn btn-sm btn-dark rounded-pill px-3 shadow-sm"
-                >Ship Now</a
+              {% if item.status == 'Completed' %}
+              <span class="text-success fw-bold"
+                ><i class="bi bi-patch-check-fill"></i> Payout Finalized</span
               >
-              {% elif item.status == 'Shipped' %}
-              <a
-                href="{{ url_for('seller.update_order_status', item_id=item.id, new_status='Delivered') }}"
-                class="btn btn-sm btn-success rounded-pill px-3 shadow-sm"
-                onclick="return confirm('Mark as Delivered?');"
-                >Complete Order</a
-              >
+              {% elif item.status == 'Cancelled' %}
+              <span class="text-muted small">Refund Processed</span>
               {% else %}
-              <i class="bi bi-check-circle-fill text-success fs-5"></i>
+              <div class="dropdown">
+                <button
+                  class="btn btn-sm btn-dark dropdown-toggle rounded-pill px-3 shadow-sm"
+                  type="button"
+                  data-bs-toggle="dropdown"
+                >
+                  Update
+                </button>
+                <ul class="dropdown-menu shadow-lg border-0">
+                  <li>
+                    <a
+                      class="dropdown-item small"
+                      href="{{ url_for('seller.update_order_status', item_id=item.id, new_status='Packed') }}"
+                      >📦 Mark Packed</a
+                    >
+                  </li>
+                  <li>
+                    <a
+                      class="dropdown-item small"
+                      href="{{ url_for('seller.update_order_status', item_id=item.id, new_status='Shipped') }}"
+                      >🚚 Mark Shipped</a
+                    >
+                  </li>
+                  <li>
+                    <a
+                      class="dropdown-item small"
+                      href="{{ url_for('seller.update_order_status', item_id=item.id, new_status='Delivered') }}"
+                      >✅ Mark Delivered</a
+                    >
+                  </li>
+                </ul>
+              </div>
               {% endif %}
             </td>
           </tr>
@@ -84,13 +118,6 @@
         </tbody>
       </table>
     </div>
-
-    {% if not orders %}
-    <div class="text-center py-5">
-      <h1 class="display-1 text-muted opacity-25">🛒</h1>
-      <p class="text-muted">No orders received yet. Good things take time!</p>
-    </div>
-    {% endif %}
   </div>
 </div>
 {% endblock %}

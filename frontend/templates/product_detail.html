@@ -1,49 +1,51 @@
 {% extends "base.html" %} {% block content %}
-<div class="container mt-5">
+
+<div class="container mt-5 animate-page">
   <!-- 🧭 Breadcrumbs -->
-  <nav aria-label="breadcrumb" class="mb-4">
+  <nav aria-label="breadcrumb" class="mb-4 text-start">
     <ol class="breadcrumb">
       <li class="breadcrumb-item">
         <a href="/" class="text-decoration-none text-info">Home</a>
       </li>
-      <li class="breadcrumb-item">
-        <a href="#" class="text-decoration-none text-muted"
-          >{{ product.category.name }}</a
-        >
-      </li>
-      <li class="breadcrumb-item active" aria-current="page">
-        {{ product.name }}
-      </li>
+      <li class="breadcrumb-item text-muted">{{ product.category.name }}</li>
+      <li class="breadcrumb-item active">{{ product.name }}</li>
     </ol>
   </nav>
 
-  <div class="row bg-white p-4 p-lg-5 rounded-5 shadow-sm border">
-    <!-- Image Slider Section -->
-    <div class="col-md-6 mb-4">
+  <div class="row bg-white p-4 p-lg-5 rounded-5 shadow-sm border mb-5 mx-0">
+    <!-- 🖼️ LEFT: IMAGE CAROUSEL -->
+    <div class="col-md-5 mb-4">
       <div
-        id="productCarousel"
-        class="carousel slide bg-light rounded-5 shadow-sm"
+        id="pCaro"
+        class="carousel slide bg-light rounded-4 border overflow-hidden"
         data-bs-ride="carousel"
       >
-        <div class="carousel-inner p-4">
-          {% for img in product.extra_images %}
+        <div class="carousel-inner p-3">
+          {% if product.extra_images %} {% for img in product.extra_images %}
           <div
             class="carousel-item {% if loop.first %}active{% endif %} text-center"
           >
             <img
               src="{{ url_for('static', filename='images/products/' + img.image_filename) }}"
               class="img-fluid"
-              style="height: 450px; object-fit: contain"
+              style="height: 400px; object-fit: contain"
             />
           </div>
-          {% endfor %}
+          {% endfor %} {% else %}
+          <div class="carousel-item active text-center">
+            <img
+              src="{{ url_for('static', filename='images/products/' + product.image) if product.image else 'https://via.placeholder.com/450' }}"
+              class="img-fluid"
+              style="height: 400px; object-fit: contain"
+            />
+          </div>
+          {% endif %}
         </div>
-
-        <!-- Controls -->
+        {% if product.extra_images|length > 1 %}
         <button
           class="carousel-control-prev"
           type="button"
-          data-bs-target="#productCarousel"
+          data-bs-target="#pCaro"
           data-bs-slide="prev"
         >
           <span
@@ -53,133 +55,305 @@
         <button
           class="carousel-control-next"
           type="button"
-          data-bs-target="#productCarousel"
+          data-bs-target="#pCaro"
           data-bs-slide="next"
         >
           <span
             class="carousel-control-next-icon bg-dark rounded-circle"
           ></span>
         </button>
+        {% endif %}
       </div>
-
-      <!-- Thumbnails (Optional) -->
-      <div class="d-flex mt-3 gap-2 overflow-auto pb-2">
+      <!-- Thumbnails -->
+      <div class="d-flex mt-3 gap-2 justify-content-center">
         {% for img in product.extra_images %}
         <img
           src="{{ url_for('static', filename='images/products/' + img.image_filename) }}"
-          style="width: 70px; height: 70px; object-fit: cover; cursor: pointer"
-          class="rounded border hover-lift"
-          data-bs-target="#productCarousel"
+          class="rounded border p-1"
+          style="width: 55px; height: 55px; cursor: pointer"
+          data-bs-target="#pCaro"
           data-bs-slide-to="{{ loop.index0 }}"
         />
         {% endfor %}
       </div>
     </div>
 
-    <!-- 📝 Product Details Section -->
-    <div class="col-md-6 ps-md-5">
-      <div class="d-flex justify-content-between align-items-start mb-2">
+    <!-- 📝 RIGHT: PRODUCT INFO -->
+    <div class="col-md-7 ps-md-5 text-start">
+      <h1 class="display-6 fw-bold text-dark mb-1">{{ product.name }}</h1>
+
+      <p class="mb-3">
+        <span class="text-muted">Brand:</span>
+        <span class="text-primary fw-bold"
+          >{{ product.brand if product.brand else 'Generic' }}</span
+        >
+      </p>
+
+      <h2 class="text-success fw-bold">
+        ₹{{ "{:,.2f}".format(product.price) }}
+        <small class="text-muted text-decoration-line-through fs-6"
+          >₹{{ "{:,.0f}".format(product.price*1.3) }}</small
+        >
         <span
-          class="badge bg-info-subtle text-info px-3 py-2 rounded-pill fw-bold text-uppercase"
+          class="badge bg-danger-subtle text-danger ms-2 small"
+          style="font-size: 0.9rem"
+          >-30% OFF</span
         >
-          {{ product.category.name }}
-        </span>
-        <span class="text-muted small">Views: {{ product.views }}</span>
-      </div>
+      </h2>
 
-      <h1 class="display-5 fw-bold text-dark mb-3">{{ product.name }}</h1>
+      <hr class="opacity-25 my-4" />
 
-      <div class="d-flex align-items-center mb-4">
-        <h2 class="text-success fw-bold mb-0">
-          ₹{{ "{:,.2f}".format(product.price) }}
-        </h2>
-        <span class="ms-3 text-muted text-decoration-line-through"
-          >₹{{ "{:,.2f}".format(product.price * 1.2) }}</span
-        >
-        <span class="ms-2 badge bg-danger-subtle text-danger">20% OFF</span>
-      </div>
-
-      <hr class="text-muted opacity-25" />
-
-      <!-- Seller & Stock Info -->
-      <div class="row my-4">
-        <div class="col-6">
-          <p class="mb-1 text-muted small text-uppercase">Sold By</p>
-          <p class="fw-bold text-dark">
-            <i class="bi bi-shop"></i> {{ product.seller.company_name }}
+      <!-- BUY LOGIC: Only for Customers -->
+      {% if current_user.role == 'customer' %}
+      <form
+        action="{{ url_for('cart.add_to_cart', product_id=product.id) }}"
+        method="POST"
+      >
+        <div class="mb-4">
+          <p class="small fw-bold text-muted mb-2 text-uppercase">
+            Select Option
           </p>
+          <div class="d-flex gap-2">
+            {% if 'Grocer' in product.category.name or 'Food' in
+            product.category.name %} {% set opts = ['1 kg', '2 kg', '5 kg'] %}
+            {% elif 'Fashion' in product.category.name or 'Cloth' in
+            product.category.name %} {% set opts = ['S', 'M', 'L', 'XL'] %} {%
+            else %} {% set opts = ['Standard Edition'] %} {% endif %} {% for opt
+            in opts %}
+            <!-- Logic is now handled by external setV() in main.js -->
+            <button
+              type="button"
+              class="btn btn-outline-dark rounded-3 px-3 v-btn {% if loop.first %}active{% endif %}"
+              onclick="setV(this, '{{ opt }}')"
+            >
+              {{ opt }}
+            </button>
+            {% endfor %}
+          </div>
+          <input
+            type="hidden"
+            name="selected_variant"
+            id="v_in"
+            value="{{ opts[0] }}"
+          />
         </div>
-        <div class="col-6">
-          <p class="mb-1 text-muted small text-uppercase">Availability</p>
-          {% if product.stock > 0 %}
-          <p class="fw-bold text-success">
-            <i class="bi bi-check-circle"></i> In Stock ({{ product.stock }}
-            pcs)
-          </p>
+
+        <div class="row g-3">
+          <div class="col-md-6">
+            <button
+              type="submit"
+              name="action"
+              value="cart"
+              class="btn btn-warning btn-lg w-100 rounded-pill py-3 fw-bold text-dark shadow-sm"
+              style="background: #ffd814; border-color: #fcd200"
+            >
+              🛒 Add to Cart
+            </button>
+          </div>
+          <div class="col-md-6">
+            <button
+              type="submit"
+              name="action"
+              value="buy"
+              class="btn btn-lg w-100 rounded-pill py-3 fw-bold text-white shadow-sm"
+              style="background: #ffa41c; border: none"
+            >
+              ⚡ Buy Now
+            </button>
+          </div>
+        </div>
+      </form>
+
+      {% elif current_user.role == 'seller' and current_user.id ==
+      product.seller.user_id %}
+      <div class="alert alert-info border-0 rounded-4 py-3 shadow-sm">
+        <p class="mb-2 fw-bold">
+          <i class="bi bi-info-circle-fill"></i> You are the owner of this
+          product.
+        </p>
+        <a
+          href="{{ url_for('product.edit_product', product_id=product.id) }}"
+          class="btn btn-primary rounded-pill px-5 py-2 fw-bold shadow-sm"
+          >⚙️ Edit Details</a
+        >
+      </div>
+      {% endif %}
+
+      <!-- 🏪 Sold By Info -->
+      <div class="mt-4 p-3 bg-light rounded-4 border">
+        <p class="mb-0 small text-muted">
+          Sold by <b class="text-info">{{ product.seller.company_name }}</b>
+        </p>
+        <p class="mb-0 text-muted small">Quality Verified by Vendora Pro</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- 📊 SPECIFICATIONS & DESCRIPTION -->
+  <div
+    class="card glass-card border-0 shadow-sm p-4 p-lg-5 mb-5 rounded-5 text-start"
+  >
+    <div class="row">
+      <div class="col-md-6 border-end">
+        <h5 class="fw-bold mb-4">Product Specifications</h5>
+        <table class="table table-sm table-borderless">
+          <tbody>
+            <tr>
+              <td class="text-muted w-50">Category</td>
+              <td class="fw-bold">{{ product.category.name }}</td>
+            </tr>
+            <tr>
+              <td class="text-muted">Brand</td>
+              <td class="fw-bold text-primary">
+                {{ product.brand if product.brand else 'Generic' }}
+              </td>
+            </tr>
+            {% if product.expiry_date %}
+            <tr>
+              <td class="text-muted text-danger">Best Before</td>
+              <td class="fw-bold text-danger">
+                {{ product.expiry_date.strftime('%d %b, %Y') }}
+              </td>
+            </tr>
+            {% endif %} {% if product.specifications %} {% for line in
+            product.specifications.split('\n') %} {% if ':' in line %}
+            <tr>
+              <td class="text-muted">{{ line.split(':')[0] }}</td>
+              <td class="fw-bold">{{ line.split(':')[1] }}</td>
+            </tr>
+            {% endif %} {% endfor %} {% endif %}
+          </tbody>
+        </table>
+      </div>
+      <div class="col-md-6 ps-md-4">
+        <h5 class="fw-bold mb-4">About this item</h5>
+        <p
+          class="text-secondary small"
+          style="white-space: pre-line; line-height: 1.6"
+        >
+          {{ product.description }}
+        </p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ⭐ RATINGS & REVIEWS SECTION -->
+<<!-- ⭐ RATINGS & REVIEWS SECTION -->
+<div class="row mt-4 mb-5">
+  <div class="col-12">
+    <div
+      class="card glass-card border-0 shadow-sm p-4 p-lg-5"
+      style="border-radius: 30px"
+    >
+      <h4 class="fw-bold mb-4 text-dark">Customer Reviews & Ratings</h4>
+
+      <div class="row">
+        <!-- ✍️ Write a Review (Only for Verified Buyers) -->
+        <div class="col-md-5 border-end">
+          {% if current_user.is_authenticated and current_user.role ==
+          'customer' %}
+
+          <!-- ✅ Logic: Check if User actually bought this product -->
+          {% set bought = False %} {% for o in current_user.orders %} {% for i
+          in o.items %} {% if i.product_id == product.id and i.status in
+          ['Delivered', 'Completed'] %} {% set bought = True %} {% endif %} {%
+          endfor %} {% endfor %} {% if bought %}
+          <div class="bg-light p-4 rounded-4 border shadow-inner">
+            <h6 class="fw-bold mb-3 text-primary">
+              <i class="bi bi-patch-check"></i> Write a Verified Review
+            </h6>
+            <form
+              action="{{ url_for('product.add_review', product_id=product.id) }}"
+              method="POST"
+              enctype="multipart/form-data"
+            >
+              <div class="mb-3">
+                <select name="rating" class="form-select border-2" required>
+                  <option value="5">⭐⭐⭐⭐⭐ (Excellent)</option>
+                  <option value="4">⭐⭐⭐⭐ (Good)</option>
+                  <option value="3">⭐⭐⭐ (Average)</option>
+                  <option value="2">⭐⭐ (Poor)</option>
+                  <option value="1">⭐ (Terrible)</option>
+                </select>
+              </div>
+              <div class="mb-3">
+                <textarea
+                  name="comment"
+                  class="form-control border-2"
+                  rows="3"
+                  placeholder="Share your experience..."
+                  required
+                ></textarea>
+              </div>
+              <div class="mb-3">
+                <label class="small fw-bold text-muted">UPLOAD PHOTO</label>
+                <input
+                  type="file"
+                  name="review_image"
+                  class="form-control form-control-sm border-2"
+                />
+              </div>
+              <button
+                type="submit"
+                class="btn btn-dark w-100 rounded-pill fw-bold py-2"
+              >
+                Submit Review
+              </button>
+            </form>
+          </div>
           {% else %}
-          <p class="fw-bold text-danger">
-            <i class="bi bi-x-circle"></i> Out of Stock
+          <div class="alert alert-secondary border-0 rounded-4 small">
+            <i class="bi bi-info-circle-fill me-1"></i> Only customers who have
+            <b>received</b> this product can leave a review.
+          </div>
+          {% endif %} {% else %}
+          <p class="text-muted italic">
+            Login as a customer to write a review.
           </p>
           {% endif %}
         </div>
-      </div>
 
-      <div class="mb-5">
-        <p class="mb-1 text-muted small text-uppercase">Description</p>
-        <p class="text-secondary leading-relaxed">{{ product.description }}</p>
-      </div>
-
-      <!-- 🛒 Action Buttons -->
-      <div class="d-grid gap-3 d-md-flex">
-        {% if current_user.is_authenticated %} {% if current_user.role ==
-        'customer' %} {% if product.stock > 0 %}
-        <a
-          href="/add-to-cart/{{ product.id }}"
-          class="btn btn-dark btn-lg px-5 rounded-pill shadow-sm py-3 fw-bold"
-        >
-          🛒 Add to Cart
-        </a>
-        {% else %}
-        <button
-          class="btn btn-secondary btn-lg px-5 rounded-pill py-3 fw-bold"
-          disabled
-        >
-          Out of Stock
-        </button>
-        {% endif %}
-        <button class="btn btn-outline-danger btn-lg rounded-pill px-4 py-3">
-          ❤️ Wishlist
-        </button>
-        {% elif current_user.id == product.seller.user_id %}
-        <a
-          href="/seller/my-products"
-          class="btn btn-outline-primary btn-lg px-5 rounded-pill py-3 fw-bold"
-        >
-          ⚙️ Manage This Product
-        </a>
-        {% endif %} {% else %}
-        <a
-          href="/login"
-          class="btn btn-dark btn-lg px-5 rounded-pill shadow-sm py-3 fw-bold"
-        >
-          Login to Buy
-        </a>
-        {% endif %}
-      </div>
-
-      <!-- 🚚 Delivery Info Mini -->
-      <div class="mt-5 p-3 bg-light rounded-4 border">
-        <div class="d-flex align-items-center">
-          <div class="fs-3 me-3 text-info">🚚</div>
-          <div>
-            <p class="mb-0 fw-bold small">Fast Delivery Available</p>
-            <p class="mb-0 text-muted small">
-              Usually delivered within 3-5 business days.
-            </p>
+        <!-- 💬 Display Reviews Section -->
+        <div class="col-md-7 ps-md-5 mt-4 mt-md-0">
+          {% if product.reviews %} {% for rev in
+          product.reviews|sort(attribute='created_at', reverse=True) %}
+          <div class="mb-4 pb-3 border-bottom">
+            <div class="d-flex align-items-center mb-2">
+              <img
+                src="{{ url_for('static', filename='images/' + rev.user_info.profile_pic) }}"
+                class="rounded-circle me-2"
+                width="30"
+                height="30"
+                style="object-fit: cover"
+              />
+              <span class="fw-bold small">{{ rev.user_info.name }}</span>
+              <span class="ms-auto text-warning small">
+                {% for i in range(rev.rating) %}⭐{% endfor %}
+              </span>
+            </div>
+            <p class="text-secondary small mb-2">{{ rev.comment }}</p>
+            {% if rev.review_image %}
+            <img
+              src="{{ url_for('static', filename='images/reviews/' + rev.review_image) }}"
+              class="rounded-3 shadow-sm"
+              width="80"
+            />
+            {% endif %}
+            <div class="text-muted mt-1" style="font-size: 0.65rem">
+              Reviewed on {{ rev.created_at.strftime('%d %b, %Y') }}
+            </div>
           </div>
+          {% endfor %} {% else %}
+          <div class="text-center py-5">
+            <h2 class="opacity-25">⭐</h2>
+            <p class="text-muted">No reviews yet. Be the first to rate!</p>
+          </div>
+          {% endif %}
         </div>
       </div>
     </div>
   </div>
 </div>
+
 {% endblock %}

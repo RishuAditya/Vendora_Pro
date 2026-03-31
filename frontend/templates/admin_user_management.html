@@ -1,0 +1,57 @@
+{% extends "base.html" %} {% block content %}
+<link
+  rel="stylesheet"
+  href="{{ url_for('static', filename='css/dashboard.css') }}"
+/>
+<div class="container mt-5 animate-page">
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <h2 class="fw-bold mb-0 text-danger">🛡️ Global User Access Control</h2>
+    <a
+      href="{{ url_for('admin.dashboard') }}"
+      class="btn btn-outline-dark btn-sm rounded-pill px-3"
+      >Back to Tower</a
+    >
+  </div>
+
+  <div class="card glass-card border-0 shadow-lg p-4">
+    <table class="table table-hover align-middle">
+      <thead class="table-light">
+        <tr>
+          <th>User ID</th>
+          <th>Name & Email</th>
+          <th>Role</th>
+          <th>Account Created</th>
+          <th class="text-center">Action</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for user in users %}
+        <tr>
+          <td>#{{ user.id }}</td>
+          <td>
+            <div class="fw-bold text-dark">{{ user.name }}</div>
+            <small class="text-muted">{{ user.email }}</small>
+          </td>
+          <td>
+            <span class="badge bg-secondary-subtle text-secondary px-3"
+              >{{ user.role|upper }}</span
+            >
+          </td>
+          <td>{{ user.created_at.strftime('%d %b, %Y') }}</td>
+          <td class="text-center">
+            <!-- ✅ Corrected Delete Route Link -->
+            <a
+              href="{{ url_for('admin.delete_user', user_id=user.id) }}"
+              class="btn btn-sm btn-outline-danger px-3 rounded-pill"
+              onclick="return confirm('CRITICAL: Are you sure you want to permanently delete user: {{ user.name }}? This cannot be undone.');"
+            >
+              <i class="bi bi-trash-fill me-1"></i> Terminate Access
+            </a>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

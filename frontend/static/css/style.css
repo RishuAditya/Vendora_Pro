@@ -1,112 +1,246 @@
-/* Glassmorphism Sidebar/Cards */
-.glass-card {
-  background: rgba(255, 255, 255, 0.2);
-  backdrop-filter: blur(10px);
-  border-radius: 15px;
-  border: 1px solid rgba(255, 255, 255, 0.1);
-}
+/* ============================================================
+   VENDORA PRO - MASTER STYLESHEET (Final Integrated Version)
+   ============================================================ */
 
-.navbar {
-  backdrop-filter: blur(15px);
-  background: rgba(33, 37, 41, 0.8) !important;
-}
-
-body {
-  background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
-  min-height: 100vh;
-}
-
-/* Global Styles */
 :root {
   --primary-color: #2c3e50;
   --accent-color: #3498db;
-  --glass-bg: rgba(255, 255, 255, 0.15);
-  --glass-border: rgba(255, 255, 255, 0.2);
+  --amazon-orange: #ffa41c;
+  --amazon-yellow: #ffd814;
+  --success-green: #28a745;
+  --glass-bg: rgba(255, 255, 255, 0.9);
 }
 
+/* 1. GLOBAL RESET & BODY */
 body {
-  background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+  background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
   min-height: 100vh;
-  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+  font-family: "Inter", sans-serif;
+  color: #333;
+  margin: 0;
+  padding: 0;
 }
 
-/* Glassmorphism Components */
-.glass-card {
-  background: white;
-  backdrop-filter: blur(10px);
-  border: 1px solid var(--glass-border);
-  border-radius: 20px !important;
-  box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.1);
-  transition: transform 0.3s ease;
-}
-
-.glass-card:hover {
-  transform: translateY(-5px);
-}
-
-/* Navbar Upgrade */
+/* 2. NAVBAR & BRANDING */
 .navbar {
-  background: var(--primary-color) !important;
-  padding: 15px 0;
+  backdrop-filter: blur(15px);
+  background: rgba(33, 37, 41, 0.9) !important;
+  padding: 12px 0;
+  z-index: 1050;
+}
+.navbar-logo {
+  height: 40px;
+  transition: 0.3s;
+}
+.navbar-logo:hover {
+  transform: scale(1.1);
+}
+.profile-nav-pic {
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid #fff;
 }
 
-.nav-link {
-  font-weight: 500;
-  margin: 0 10px;
+/* 3. CATEGORY SECTION (Amazon Style) */
+.category-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
 }
-
-/* Custom Buttons */
-.btn-rounded {
-  border-radius: 50px;
-  padding: 8px 25px;
-  font-weight: 600;
-}
-
-/* Product Card Image Frame */
-.product-img-container {
-  width: 100%;
-  height: 250px; /* Fixed height for uniformity */
-  background-color: #f8f9fa; /* Background color for transparent images */
+.category-circle {
+  width: 75px !important;
+  height: 75px !important;
+  background: #fff;
+  border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
-  overflow: hidden;
-  border-radius: 15px 15px 0 0;
+  font-size: 1.8rem;
+  transition: 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+.category-item:hover .category-circle {
+  transform: scale(1.1);
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+}
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
 }
 
-.product-img-container img {
-  max-width: 100%;
-  max-height: 100%;
-  object-fit: contain; /* Isse image kategi nahi, poori dikhegi */
-  transition: transform 0.5s ease;
-}
-
-/* My Products (Seller) Thumbnail Frame */
-.thumbnail-frame {
-  width: 80px; /* Size thoda badha diya */
-  height: 80px;
+/* Fixed Scroll Buttons */
+.scroll-btn {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 35px;
+  height: 35px;
   background: #fff;
   border: 1px solid #ddd;
-  border-radius: 8px;
+  border-radius: 50%;
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
+}
+.scroll-left {
+  left: -10px;
+}
+.scroll-right {
+  right: -10px;
+}
+
+/* 4. CARDS & GLASSMORPHISM */
+.glass-card {
+  background: white;
+  border-radius: 15px !important;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.05);
+  overflow: hidden;
+  transition: 0.3s ease;
+}
+.hover-lift:hover {
+  transform: translateY(-8px);
+  box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1) !important;
+}
+
+/* 5. PRODUCT GRID & IMAGES (Fixed Sizing) */
+.product-img-container {
+  width: 100%;
+  height: 160px; /* Locked height for uniformity */
+  background: #fff;
   display: flex;
   align-items: center;
   justify-content: center;
   overflow: hidden;
+  padding: 10px;
 }
-
-.thumbnail-frame img {
+.product-img-container img {
   max-width: 100%;
   max-height: 100%;
   object-fit: contain;
 }
+.card-body {
+  padding: 12px !important;
+}
 
-/* ✨ COOL ANIMATIONS ✨ */
+/* 6. INVENTORY & FORMS */
+.inventory-thumb {
+  width: 80px !important;
+  height: 80px !important;
+  object-fit: contain;
+  background: #fff;
+  border-radius: 10px;
+  border: 1px solid #eee;
+}
+.form-container-premium {
+  max-width: 800px;
+  margin: auto;
+  background: white;
+  border-radius: 30px;
+  padding: 40px;
+  box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
+}
+.form-control-premium {
+  border-radius: 12px !important;
+  padding: 10px 15px !important;
+  border: 2px solid #eee !important;
+  transition: 0.3s;
+}
+.form-control-premium:focus {
+  border-color: #0dcaf0 !important;
+  box-shadow: 0 0 15px rgba(13, 202, 240, 0.2) !important;
+}
 
-/* 1. Page Fade-In (Jab page load ho toh smooth dikhe) */
+/* 7. DASHBOARD GRADIENTS */
+.bg-grad-blue {
+  background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+}
+.bg-grad-purple {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+}
+.bg-grad-green {
+  background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+}
+
+/* --- 🚨 FINAL FIXED TRACKER (No Overflows) --- */
+.track-container {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  padding: 30px 10px;
+  position: relative;
+}
+
+.track-step {
+  position: relative;
+  width: 100%;
+  text-align: center;
+}
+
+/* Line logic: Sirf steps ke beech mein */
+.track-step::after {
+  content: "";
+  position: absolute;
+  top: 12px; /* Dot ke center mein */
+  left: 50%; /* Dot ke aage se shuru */
+  width: 100%;
+  height: 4px;
+  background: #e0e0e0;
+  z-index: 0;
+}
+
+/* Last child ke aage line nahi honi chahiye */
+.track-step:last-child::after {
+  display: none;
+}
+
+/* Color Fill Logic */
+.track-step.completed::after,
+.track-step.active:not(:last-child)::after {
+  background: var(--success-green);
+}
+
+.track-dot {
+  width: 24px;
+  height: 24px;
+  background: #e0e0e0;
+  border-radius: 50%;
+  border: 4px solid #fff;
+  position: relative;
+  z-index: 2;
+  margin: 0 auto 8px;
+  transition: 0.3s ease;
+}
+
+.track-step.active .track-dot,
+.track-step.completed .track-dot {
+  background: var(--success-green);
+  box-shadow: 0 0 10px rgba(40, 167, 69, 0.4);
+}
+
+.track-label {
+  font-size: 0.7rem;
+  font-weight: 600;
+  color: #888;
+}
+
+.track-step.active .track-label {
+  color: #000;
+}
+
+/* 9. MISC: PROMO & ANIMATIONS */
+.shadow-text {
+  text-shadow: 2px 2px 8px rgba(0, 0, 0, 0.4);
+}
+.animate-page {
+  animation: fadeIn 0.8s ease-out;
+}
 @keyframes fadeIn {
   from {
     opacity: 0;
-    transform: translateY(20px);
+    transform: translateY(10px);
   }
   to {
     opacity: 1;
@@ -114,68 +248,13 @@ body {
   }
 }
 
-.animate-page {
-  animation: fadeIn 0.8s ease-out;
+/* Utils */
+.btn-rounded {
+  border-radius: 50px;
+  font-weight: 600;
 }
-
-/* 2. Hover Lift Effect (Jo aapne Inventory mein dekha) */
-.hover-lift {
-  transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
-}
-
-.hover-lift:hover {
-  transform: translateY(-10px) scale(1.02);
-  box-shadow: 0 15px 30px rgba(0, 0, 0, 0.1) !important;
-}
-
-/* 3. Input Glow Effect (Login/Register inputs ke liye) */
-.form-control {
-  border-radius: 10px;
-  padding: 12px;
-  border: 1px solid #ddd;
-  transition: all 0.3s ease;
-}
-
-.form-control:focus {
-  border-color: #0dcaf0;
-  box-shadow: 0 0 15px rgba(13, 202, 240, 0.2);
-  transform: scale(1.01);
-}
-
-/* 4. Button Pulse (Jo important buttons ko chamkayega) */
 .btn-cool {
   background: linear-gradient(45deg, #0dcaf0, #007bff);
   border: none;
   color: white;
-  font-weight: 600;
-  transition: all 0.4s ease;
-}
-
-.btn-cool:hover {
-  letter-spacing: 1px;
-  box-shadow: 0 5px 15px rgba(13, 202, 240, 0.4);
-}
-
-.input-group-text {
-  border-radius: 12px 0 0 12px;
-}
-.form-select {
-  border-radius: 12px;
-  padding: 12px;
-}
-/* Category Pill Style (Optional for later) */
-.category-pill {
-  padding: 8px 20px;
-  border-radius: 50px;
-  background: white;
-  border: 1px solid #ddd;
-  color: #555;
-  text-decoration: none;
-  transition: all 0.3s ease;
-}
-.category-pill:hover,
-.category-pill.active {
-  background: #0dcaf0;
-  color: white;
-  border-color: #0dcaf0;
 }

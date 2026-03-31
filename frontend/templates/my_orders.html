@@ -1,62 +1,125 @@
 {% extends "base.html" %} {% block content %}
-<div class="container mt-5">
-  <h2 class="mb-4">📦 My Order History</h2>
+<div class="container mt-5 animate-page text-start">
+  <h2 class="fw-bold mb-4">📦 My Order History</h2>
 
   {% if orders %} {% for order in orders %}
-  <div class="card glass-card mb-4 border-0 shadow-sm p-4">
+  <div class="card glass-card mb-5 border-0 shadow-lg p-4 rounded-4">
     <div class="d-flex justify-content-between align-items-center mb-3">
       <div>
-        <span class="text-muted small">Order ID: #{{ order.id }}</span><br />
+        <span class="text-muted small">Order ID: #ORD-{{ order.id }}</span
+        ><br />
         <span class="fw-bold"
           >{{ order.created_at.strftime('%d %b %Y, %I:%M %p') }}</span
         >
       </div>
       <div class="text-end">
-        <span class="badge bg-success">Status: {{ order.payment_status }}</span
-        ><br />
-        <h4 class="text-dark mt-1">₹{{ order.total_amount }}</h4>
+        <span class="badge bg-success rounded-pill px-3 mb-1 text-uppercase"
+          >{{ order.payment_mode }} PAYMENT</span
+        >
+        <h3 class="text-dark fw-bold mb-1">
+          ₹{{ "{:,.2f}".format(order.total_amount) }}
+        </h3>
+        <a
+          href="{{ url_for('order.view_invoice', order_id=order.id) }}"
+          class="btn btn-sm btn-outline-primary rounded-pill px-3 fw-bold"
+        >
+          <i class="bi bi-file-earmark-pdf"></i> View Invoice
+        </a>
       </div>
     </div>
-    <hr />
-    <div class="text-end">
-      <span class="badge bg-success">Status: {{ order.payment_status }}</span
-      ><br />
-      <h4 class="text-dark mt-1">₹{{ order.total_amount }}</h4>
-      <!-- NAYA: Invoice Link Button -->
-      <a
-        href="{{ url_for('order.view_invoice', order_id=order.id) }}"
-        class="btn btn-outline-primary btn-sm rounded-pill mt-2"
-      >
-        <i class="bi bi-file-earmark-pdf"></i> View Invoice
-      </a>
-    </div>
-    <div class="row">
-      {% for item in order.items %}
-      <div class="col-md-6 mb-2">
-        <div class="d-flex align-items-center">
+
+    <hr class="opacity-25" />
+
+    {% for item in order.items %}
+    <div class="row align-items-center mb-4 g-3">
+      <div class="col-md-5">
+        <div
+          class="d-flex align-items-center bg-light p-3 rounded-4 h-100 border"
+        >
           <img
             src="{{ url_for('static', filename='images/products/' + item.product.image) }}"
-            width="40"
-            class="rounded me-2"
+            width="60"
+            class="rounded-3 shadow-sm me-3"
           />
-          <div>
-            <span class="d-block fw-bold">{{ item.product.name }}</span>
+          <div class="flex-grow-1">
+            <span class="d-block fw-bold text-dark"
+              >{{ item.product.name }}</span
+            >
             <small class="text-muted"
-              >Qty: {{ item.quantity }} × ₹{{ item.price_at_time }}</small
+              >Qty: {{ item.quantity }} | {{ item.variant or 'Standard'
+              }}</small
             >
-            <span class="badge bg-info ms-2" style="font-size: 0.7rem"
-              >{{ item.status }}</span
-            >
+
+            <!-- ✅ CUSTOMER ACTIONS (THE FIX) -->
+            <div class="mt-3">
+              {% if item.status == 'Pending' or item.status == 'Shipped' %}
+              <a
+                href="{{ url_for('order.cancel_order', item_id=item.id) }}"
+                class="btn btn-sm btn-outline-danger px-3 rounded-pill fw-bold"
+                onclick="return confirm('Cancel this item?');"
+                >Cancel Order</a
+              >
+              {% elif item.status == 'Delivered' %}
+              <div class="d-flex gap-2">
+                <!-- 🚨 RE-CONNECTED BUTTON -->
+                <a
+                  href="{{ url_for('order.confirm_receipt', item_id=item.id) }}"
+                  class="btn btn-sm btn-success rounded-pill px-4 shadow-sm fw-bold"
+                >
+                  I'm Satisfied ✅
+                </a>
+                <button
+                  class="btn btn-sm btn-outline-danger rounded-pill px-3"
+                  onclick="alert('Return period is active.')"
+                >
+                  Return
+                </button>
+              </div>
+              {% elif item.status == 'Completed' %}
+              <span
+                class="badge bg-success-subtle text-success px-3 py-2 rounded-pill"
+                ><i class="bi bi-check-circle-fill me-1"></i> Received &
+                Finalized</span
+              >
+              {% elif item.status == 'Cancelled' %}
+              <span
+                class="badge bg-danger-subtle text-danger px-3 py-2 rounded-pill"
+                >Order Cancelled</span
+              >
+              {% endif %}
+            </div>
           </div>
         </div>
       </div>
-      {% endfor %}
+
+      <!-- 🚚 VISUAL TRACKING BAR -->
+      <div class="col-md-7">
+        {% if item.status != 'Cancelled' %}
+        <div class="track-container">
+          {% set stages = ['Pending', 'Packed', 'Shipped', 'Out for Delivery',
+          'Delivered'] %} {% set current_idx = stages.index(item.status) if
+          item.status in stages else (5 if item.status == 'Completed' else 0) %}
+          {% for s in stages %}
+          <div
+            class="track-step {% if loop.index0 <= current_idx %}active{% endif %} {% if loop.index0 < current_idx %}completed{% endif %}"
+          >
+            <div class="track-dot"></div>
+            <div class="track-label d-none d-md-block">{{ s }}</div>
+          </div>
+          {% endfor %}
+        </div>
+        {% endif %}
+      </div>
     </div>
+    {% endfor %}
   </div>
   {% endfor %} {% else %}
-  <div class="text-center py-5">
-    <h3>No orders yet! 🛒</h3>
-    <a href="/" class="btn btn-primary mt-3">Start Shopping</a>
+  <div class="text-center py-5 card glass-card border-0">
+    <h1 class="display-1 opacity-25">🛒</h1>
+    <h4 class="text-muted">No orders found.</h4>
+    <a href="/" class="btn btn-primary mt-3 rounded-pill px-5"
+      >Start Shopping</a
+    >
   </div>
   {% endif %}
 </div>

@@ -1,72 +1,135 @@
 {% extends "base.html" %} {% block content %}
-<div class="container mt-5">
-  <h2 class="mb-4">🛒 Your Shopping Cart</h2>
+<div class="container mt-5 animate-page">
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <h2 class="fw-bold text-dark">
+      <i class="bi bi-cart3 me-2"></i>Your Shopping Cart
+    </h2>
+    <a href="/" class="btn btn-outline-dark btn-sm rounded-pill px-3"
+      >Continue Shopping</a
+    >
+  </div>
 
   {% if items %}
-  <div class="row">
-    <div class="col-md-8">
+  <div class="row g-4">
+    <!-- 🛒 Left Side: Items List -->
+    <div class="col-lg-8">
       <div class="card glass-card border-0 shadow-sm p-3">
-        <table class="table align-middle">
-          <thead>
-            <tr>
-              <th>Product</th>
-              <th>Price</th>
-              <th>Quantity</th>
-              <th>Subtotal</th>
-              <th>Action</th>
-            </tr>
-          </thead>
-          <tbody>
-            {% for item in items %}
-            <tr>
-              <td>
-                <div class="d-flex align-items-center">
-                  <img
-                    src="{{ url_for('static', filename='images/products/' + item.product.image) }}"
-                    class="rounded me-3"
-                    width="50"
-                  />
-                  <span class="fw-bold">{{ item.product.name }}</span>
-                </div>
-              </td>
-              <td>₹{{ item.product.price }}</td>
-              <td>{{ item.quantity }}</td>
-              <td>₹{{ item.product.price * item.quantity }}</td>
-              <td>
-                <a href="/remove-from-cart/{{ item.id }}" class="text-danger"
-                  >❌</a
-                >
-              </td>
-            </tr>
-            {% endfor %}
-          </tbody>
-        </table>
+        <div class="table-responsive">
+          <table class="table align-middle">
+            <thead class="table-light">
+              <tr class="small text-muted text-uppercase">
+                <th>Product</th>
+                <th>Details</th>
+                <th class="text-center">Qty</th>
+                <th class="text-end">Subtotal</th>
+                <th class="text-center">Action</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for item in items %}
+              <tr>
+                <td style="width: 100px">
+                  <div
+                    class="bg-white rounded-3 p-1 border shadow-sm"
+                    style="width: 70px; height: 70px"
+                  >
+                    <img
+                      src="{{ url_for('static', filename='images/products/' + item.product.image) }}"
+                      class="img-fluid h-100 w-100"
+                      style="object-fit: contain"
+                    />
+                  </div>
+                </td>
+                <td>
+                  <div class="fw-bold text-dark">{{ item.product.name }}</div>
+                  <!-- ✅ NAYA: Variant Display (Size/Weight) -->
+                  <small
+                    class="badge bg-secondary-subtle text-secondary rounded-pill px-2"
+                  >
+                    Variant: {{ item.variant or 'Standard' }}
+                  </small>
+                  <div class="small text-muted mt-1">
+                    Price: ₹{{ "{:,.2f}".format(item.product.price) }}
+                  </div>
+                </td>
+                <td class="text-center fw-bold">{{ item.quantity }}</td>
+                <td class="text-end fw-bold text-dark">
+                  ₹{{ "{:,.2f}".format(item.product.price * item.quantity) }}
+                </td>
+                <td class="text-center">
+                  <a
+                    href="{{ url_for('cart.remove_cart', cart_id=item.id) }}"
+                    class="btn btn-sm btn-light border rounded-circle text-danger shadow-sm hover-lift"
+                    onclick="return confirm('Remove this item from cart?');"
+                  >
+                    <i class="bi bi-trash"></i>
+                  </a>
+                </td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
       </div>
     </div>
 
-    <!-- Summary Side Box -->
-    <div class="col-md-4">
-      <div class="card glass-card border-0 shadow-sm p-4">
-        <h4>Order Summary</h4>
-        <hr />
-        <div class="d-flex justify-content-between mb-3">
+    <!-- 💰 Right Side: Order Summary -->
+    <div class="col-lg-4">
+      <div
+        class="card glass-card border-0 shadow-lg p-4 sticky-top"
+        style="top: 100px"
+      >
+        <h4 class="fw-bold mb-4">Order Summary</h4>
+
+        <div class="d-flex justify-content-between mb-3 text-muted">
           <span>Total Items:</span>
-          <strong>{{ items|length }}</strong>
+          <strong class="text-dark">{{ items|length }}</strong>
         </div>
+
+        <div class="d-flex justify-content-between mb-3 text-muted">
+          <span>Shipping Fee:</span>
+          <strong class="text-success small text-uppercase">Free</strong>
+        </div>
+
+        <hr class="my-4 opacity-25" />
+
         <div class="d-flex justify-content-between mb-4">
-          <span>Total Amount:</span>
-          <h3 class="text-success fw-bold">₹{{ total }}</h3>
+          <span class="fs-5 fw-bold">Total Payable:</span>
+          <h3 class="text-primary fw-bold mb-0">
+            ₹{{ "{:,.2f}".format(total) }}
+          </h3>
         </div>
-        <a href="/checkout" class="btn btn-dark btn-lg w-100 rounded-pill"
-          >Confirm Order (Pay via Wallet)</a
-        >
+
+        <!-- ✅ UPDATED LINK: Ab ye hamare Smart Checkout Page par bhejega -->
+        <div class="d-grid gap-2">
+          <a
+            href="{{ url_for('order.checkout_page') }}"
+            class="btn btn-dark btn-lg rounded-pill py-3 fw-bold shadow"
+          >
+            Proceed to Checkout ➔
+          </a>
+          <div class="text-center mt-3">
+            <img
+              src="https://help.zazzle.com/hc/article_attachments/360010513393/Logos-01.png"
+              width="200"
+              style="opacity: 0.5"
+            />
+          </div>
+        </div>
       </div>
     </div>
   </div>
   {% else %}
+  <!-- 😕 Empty Cart State -->
   <div class="text-center py-5">
-    <h3>Your cart is empty! 🛍️</h3>
-    <a href="/" class="btn btn-primary mt-3">Start Shopping</a>
+    <div class="display-1 mb-4">🛒</div>
+    <h3 class="text-muted">Your cart is currently empty!</h3>
+    <p class="text-muted mb-4">
+      Don’t worry, we have some great deals for you.
+    </p>
+    <a href="/" class="btn btn-primary btn-lg rounded-pill px-5 shadow"
+      >Start Shopping Now 🚀</a
+    >
   </div>
   {% endif %}
 </div>

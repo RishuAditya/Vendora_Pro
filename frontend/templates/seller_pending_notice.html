@@ -1,0 +1,24 @@
+{% extends "base.html" %} {% block content %}
+<div class="container mt-5 text-center animate-page">
+  <div
+    class="card glass-card border-0 shadow-lg p-5 mx-auto"
+    style="max-width: 600px; border-radius: 30px"
+  >
+    {% if current_user.seller_profile.status == 'rejected' %}
+    <div class="display-1 text-danger mb-4">❌</div>
+    <h2 class="fw-bold">Application Rejected</h2>
+    <p class="text-muted fs-5">Review your shop details and apply again.</p>
+    <a
+      href="{{ url_for('seller.reapply_seller') }}"
+      class="btn btn-primary rounded-pill px-5 py-3 fw-bold"
+      >Update & Re-apply 🚀</a
+    >
+    {% else %}
+    <div class="display-1 text-warning mb-4">⏳</div>
+    <h2 class="fw-bold">Verification Pending</h2>
+    <p class="text-muted fs-5">Admin is reviewing your profile.</p>
+    {% endif %}
+    <a href="/logout" class="btn btn-link text-muted mt-3 d-block">Logout</a>
+  </div>
+</div>
+{% endblock %}

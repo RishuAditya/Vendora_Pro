@@ -1,75 +1,181 @@
 {% extends "base.html" %} {% block content %}
-<div class="container mt-5">
-  <div class="card glass-card shadow p-4 mx-auto" style="max-width: 600px">
-    <h3 class="mb-4">📦 Add New Product</h3>
+<div class="container mt-5 animate-page">
+  <div class="form-container-premium shadow-lg">
+    <h2 class="fw-bold text-center mb-4 text-dark">📦 List New Product</h2>
     <form method="POST" enctype="multipart/form-data">
-      <!-- multipart add kiya -->
-      <div class="mb-3">
-        <label class="form-label">Product Name</label>
-        <input type="text" name="name" class="form-control" required />
-      </div>
-      <div class="mb-3">
-        <label class="form-label">Product Image</label>
+      <!-- Row 1: Title -->
+      <div class="mb-4">
+        <label class="form-label small fw-bold text-muted text-uppercase"
+          >Product Title</label
+        >
         <input
-          type="file"
-          name="image"
-          class="form-control"
-          accept="image/*"
+          type="text"
+          name="name"
+          class="form-control form-control-premium"
+          placeholder="e.g. Pintola Peanut Butter"
           required
         />
       </div>
-      <div class="mb-3">
-        <label class="form-label">Category</label>
-        <select name="category_id" class="form-select" required>
-          {% for cat in categories %}
-          <option value="{{ cat.id }}">{{ cat.name }}</option>
-          {% endfor %}
-        </select>
+
+      <!-- Row 2: Category & Brand -->
+      <div class="row g-3 mb-4">
+        <div class="col-md-6">
+          <label class="form-label small fw-bold text-muted text-uppercase"
+            >Category</label
+          >
+          <select
+            name="category_id"
+            id="catSelect"
+            class="form-select form-control-premium"
+            required
+            onchange="toggleIntelligence()"
+          >
+            {% for cat in categories %}
+            <option value="{{ cat.id }}">{{ cat.name }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        <div class="col-md-6">
+          <label class="form-label small fw-bold text-muted text-uppercase"
+            >Brand Name</label
+          >
+          <input
+            type="text"
+            name="brand"
+            class="form-control form-control-premium"
+            placeholder="e.g. Samsung, Apple"
+            required
+          />
+        </div>
       </div>
-      <div class="row">
-        <div class="col-md-6 mb-3">
-          <label class="form-label">Price (₹)</label>
+
+      <!-- Row 3: Intelligence (Expiry/Weight/Warranty) -->
+      <div class="row g-3 mb-4">
+        <div class="col-md-6" id="expBox" style="display: none">
+          <label class="form-label fw-bold text-danger small text-uppercase"
+            >Expiry Date</label
+          >
+          <input
+            type="date"
+            name="expiry_date"
+            class="form-control form-control-premium border-danger"
+          />
+          <div class="form-check mt-1 small">
+            <input
+              class="form-check-input"
+              type="checkbox"
+              name="is_food"
+              id="if"
+            />
+            <label class="form-check-label" for="if">Is Food Item?</label>
+          </div>
+        </div>
+        <div class="col-md-6">
+          <label class="form-label small fw-bold text-muted text-uppercase"
+            >Weight / Quantity</label
+          >
+          <input
+            type="text"
+            name="weight_qty"
+            class="form-control form-control-premium"
+            placeholder="e.g. 1kg, 500ml, 1 pc"
+          />
+        </div>
+        <div class="col-md-12">
+          <label class="form-label small fw-bold text-muted text-uppercase"
+            >Warranty Information</label
+          >
+          <input
+            type="text"
+            name="warranty"
+            class="form-control form-control-premium"
+            placeholder="e.g. 1 Year Brand Warranty"
+          />
+        </div>
+      </div>
+
+      <!-- Row 4: Price & Stock -->
+      <div class="row g-3 mb-4">
+        <div class="col-md-6">
+          <label class="form-label small fw-bold text-muted text-uppercase"
+            >Price (₹)</label
+          >
           <input
             type="number"
             name="price"
             step="0.01"
-            class="form-control"
+            class="form-control form-control-premium"
             required
           />
         </div>
-        <div class="mb-3">
-          <label class="form-label fw-bold"
-            >Upload Product Images (Select Multiple)</label
+        <div class="col-md-6">
+          <label class="form-label small fw-bold text-muted text-uppercase"
+            >Stock Units</label
           >
-
           <input
-            type="file"
-            name="images"
-            class="form-control"
-            accept="image/*"
-            multiple
+            type="number"
+            name="stock"
+            class="form-control form-control-premium"
             required
           />
-          <small class="text-muted">First image will be the cover photo.</small>
-        </div>
-        <div class="col-md-6 mb-3">
-          <label class="form-label">Stock</label>
-          <input type="number" name="stock" class="form-control" required />
         </div>
       </div>
-      <div class="mb-3">
-        <label class="form-label">Description</label>
+
+      <!-- Row 5: Images & Specs -->
+      <div class="mb-4">
+        <label class="form-label small fw-bold text-muted text-uppercase"
+          >Product Images (Multiple)</label
+        >
+        <input
+          type="file"
+          name="images"
+          class="form-control form-control-premium shadow-none"
+          multiple
+          required
+        />
+      </div>
+
+      <div class="mb-4">
+        <label class="form-label small fw-bold text-muted text-uppercase"
+          >Technical Specifications</label
+        >
+        <textarea
+          name="specifications"
+          class="form-control form-control-premium"
+          rows="3"
+          placeholder="RAM: 8GB&#10;Color: Blue"
+        ></textarea>
+      </div>
+
+      <div class="mb-4">
+        <label class="form-label small fw-bold text-muted text-uppercase"
+          >Description</label
+        >
         <textarea
           name="description"
-          class="form-control"
-          rows="3"
+          class="form-control form-control-premium"
+          rows="2"
           required
         ></textarea>
       </div>
-      <button type="submit" class="btn btn-primary w-100">
-        Publish Product
+
+      <button
+        type="submit"
+        class="btn btn-dark btn-lg w-100 rounded-pill py-3 fw-bold shadow"
+      >
+        🚀 Publish to Marketplace
       </button>
     </form>
   </div>
 </div>
+
+<script>
+  function toggleIntelligence() {
+    const sel = document.getElementById("catSelect");
+    const txt = sel.options[sel.selectedIndex].text;
+    document.getElementById("expBox").style.display =
+      txt.includes("Grocer") || txt.includes("Food") ? "block" : "none";
+  }
+  document.addEventListener("DOMContentLoaded", toggleIntelligence);
+</script>
 {% endblock %}

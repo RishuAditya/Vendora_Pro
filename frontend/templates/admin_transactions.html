@@ -1,0 +1,71 @@
+{% extends "base.html" %} {% block content %}
+<div class="container mt-5 animate-page">
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <h2 class="fw-bold text-dark">💰 Universal Financial Ledger</h2>
+    <a
+      href="/admin/dashboard"
+      class="btn btn-outline-dark btn-sm rounded-pill px-3"
+      >Back to Tower</a
+    >
+  </div>
+
+  <div class="card glass-card border-0 shadow-lg p-4">
+    <div class="table-responsive">
+      <table class="table table-hover align-middle">
+        <thead class="table-light">
+          <tr>
+            <th>Date & Time</th>
+            <th>User (Actor)</th>
+            <th>Purpose / Details</th>
+            <th>Amount</th>
+            <th>Type</th>
+            <th>Payment Mode</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for tx in transactions %}
+          <tr>
+            <td class="small text-muted">
+              {{ tx.created_at.strftime('%d %b, %Y | %I:%M %p') }}
+            </td>
+            <td>
+              <div class="fw-bold small">{{ tx.user.name }}</div>
+              <span
+                class="badge bg-secondary-subtle text-secondary"
+                style="font-size: 0.6rem"
+                >{{ tx.user.role|upper }}</span
+              >
+            </td>
+            <td class="small fw-bold">{{ tx.purpose }}</td>
+            <td
+              class="fw-bold {% if tx.type == 'Credit' %}text-success{% else %}text-danger{% endif %}"
+            >
+              {% if tx.type == 'Credit' %}+{% else %}-{% endif %} ₹{{
+              "{:,.2f}".format(tx.amount) }}
+            </td>
+            <td>
+              <span
+                class="badge {% if tx.type == 'Credit' %}bg-success{% else %}bg-danger{% endif %}"
+                >{{ tx.type }}</span
+              >
+            </td>
+            <td>
+              <!-- Card last 4 digits logic -->
+              <small class="text-muted">
+                {% if tx.card_last_four %} 💳 Card Ending ****{{
+                tx.card_last_four }} {% else %} 👛 Wallet / Internal {% endif %}
+              </small>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    {% if not transactions %}
+    <p class="text-center py-5 text-muted">
+      No transactions recorded on the platform yet.
+    </p>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

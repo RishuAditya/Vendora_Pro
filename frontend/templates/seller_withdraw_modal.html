@@ -1,0 +1,87 @@
+<div class="modal fade" id="withdrawModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content border-0 shadow-lg" style="border-radius: 25px">
+      <div
+        class="modal-header bg-dark text-white border-0 py-3"
+        style="border-radius: 25px 25px 0 0"
+      >
+        <h5 class="modal-title fw-bold">💸 Withdraw Funds</h5>
+        <button
+          type="button"
+          class="btn-close btn-close-white"
+          data-bs-dismiss="modal"
+        ></button>
+      </div>
+      <form action="{{ url_for('seller.withdraw_money') }}" method="POST">
+        <div class="modal-body p-4">
+          <label class="form-label small fw-bold text-muted"
+            >AMOUNT TO TRANSFER (₹)</label
+          >
+          <input
+            type="number"
+            name="amount"
+            class="form-control mb-4 border-2"
+            placeholder="Max: {{ current_user.wallet_balance }}"
+            required
+            max="{{ current_user.wallet_balance }}"
+            min="1"
+          />
+
+          <label class="form-label small fw-bold text-muted text-uppercase"
+            >Card / Account</label
+          >
+          <select
+            name="saved_card_id"
+            id="sellerCardSelector"
+            class="form-select mb-3"
+            onchange="toggleSellerCardForm()"
+          >
+            <option value="new">+ Use New Card</option>
+            {% for card in current_user.saved_cards %}
+            <option value="{{ card.id }}">
+              💳 Visa Ending in {{ card.card_last_four }}
+            </option>
+            {% endfor %}
+          </select>
+
+          <div id="sellerNewCardForm">
+            <input
+              type="text"
+              name="card_name"
+              class="form-control mb-2"
+              placeholder="Holder Name"
+            />
+            <input
+              type="text"
+              name="card_number"
+              class="form-control mb-2"
+              placeholder="16 Digit Card No"
+              maxlength="16"
+            />
+            <div class="row g-2 mb-2">
+              <div class="col-6">
+                <input
+                  type="text"
+                  name="expiry"
+                  class="form-control"
+                  placeholder="MM/YY"
+                />
+              </div>
+              <div class="col-6">
+                <input type="password" class="form-control" placeholder="CVV" />
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer border-0 p-4 pt-0">
+          <button
+            type="submit"
+            class="btn btn-primary btn-lg w-100 rounded-pill fw-bold"
+          >
+            Transfer Now ⚡
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>

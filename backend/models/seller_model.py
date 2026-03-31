@@ -6,6 +6,7 @@ class Seller(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey("users.id", ondelete="CASCADE"), nullable=False, unique=True)
     company_name = db.Column(db.String(150), nullable=False)
+    shop_address = db.Column(db.Text) 
     status = db.Column(db.String(20), default="pending")
     total_sales = db.Column(db.Float, default=0.0)
     seller_score = db.Column(db.Integer, default=100)

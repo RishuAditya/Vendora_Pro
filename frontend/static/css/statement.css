@@ -1,0 +1,34 @@
+/* Screen Layout */
+.statement-card {
+  border-radius: 20px;
+  background: #fff;
+}
+
+/* 🖨️ PRINT RULES */
+@media print {
+  .navbar,
+  footer,
+  .d-print-none {
+    display: none !important;
+  }
+  body {
+    background: white !important;
+    color: black !important;
+  }
+  .container {
+    width: 100% !important;
+    max-width: none !important;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+  .statement-card {
+    box-shadow: none !important;
+    border: none !important;
+  }
+  .table {
+    border: 1px solid #333 !important;
+  }
+  * {
+    -webkit-print-color-adjust: exact !important;
+  }
+}

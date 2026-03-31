@@ -6,22 +6,37 @@ from backend.models.cart_model import Cart
 
 cart_bp = Blueprint("cart", __name__)
 
-@cart_bp.route("/add-to-cart/<int:product_id>")
+# ---------------------------------------------------------
+# 🛒 1. ADD TO CART / BUY NOW LOGIC
+# ---------------------------------------------------------
+@cart_bp.route("/add-to-cart/<int:product_id>", methods=["POST"])
 @login_required
 def add_to_cart(product_id):
-    # Check if item already in cart
-    cart_item = Cart.query.filter_by(user_id=current_user.id, product_id=product_id).first()
+    # Form se variant aur action (cart/buy) uthao
+    variant = request.form.get("selected_variant", "Standard")
+    action = request.form.get("action", "cart") # Button ki value 'buy' ya 'cart'
+
+    # Check if same product with SAME variant already in cart
+    cart_item = Cart.query.filter_by(user_id=current_user.id, product_id=product_id, variant=variant).first()
     
     if cart_item:
         cart_item.quantity += 1
     else:
-        new_item = Cart(user_id=current_user.id, product_id=product_id)
+        new_item = Cart(user_id=current_user.id, product_id=product_id, variant=variant)
         db.session.add(new_item)
     
     db.session.commit()
-    flash("Item added to cart! 🛒", "success")
-    return redirect(url_for('cart.view_cart'))
 
+    # ✅ FIXED REDIRECT: Ab ye 'checkout_page' ko sahi raste pe bhejega
+    if action == "buy":
+        return redirect(url_for('order.checkout_page'))
+        
+    flash(f"Item ({variant}) added to cart! 🛒", "success")
+    return redirect(url_for('product.product_detail', product_id=product_id))
+
+# ---------------------------------------------------------
+# 📋 2. VIEW CART
+# ---------------------------------------------------------
 @cart_bp.route("/cart")
 @login_required
 def view_cart():
@@ -29,6 +44,9 @@ def view_cart():
     total = sum(item.product.price * item.quantity for item in items)
     return render_template("cart.html", items=items, total=total)
 
+# ---------------------------------------------------------
+# 🗑️ 3. REMOVE FROM CART
+# ---------------------------------------------------------
 @cart_bp.route("/remove-from-cart/<int:cart_id>")
 @login_required
 def remove_cart(cart_id):
@@ -36,5 +54,5 @@ def remove_cart(cart_id):
     if item.user_id == current_user.id:
         db.session.delete(item)
         db.session.commit()
-        flash("Item removed.", "info")
+        flash("Item removed from cart.", "info")
     return redirect(url_for('cart.view_cart'))

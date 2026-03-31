@@ -1,81 +1,142 @@
 {% extends "base.html" %} {% block content %}
-<div
-  class="container d-flex justify-content-center align-items-center vh-100 animate-page"
->
+<div class="container mt-5 animate-page">
   <div
-    class="card glass-card hover-lift shadow-lg p-4 border-0"
-    style="width: 450px; border-radius: 25px"
+    class="card glass-card shadow-lg border-0 mx-auto"
+    style="max-width: 650px; border-radius: 30px"
   >
-    <div class="text-center mb-4">
-      <div class="fs-1 mb-2"></div>
-      <h2 class="fw-bold text-dark">Join Vendora</h2>
-      <p class="text-muted small">
-        Start your journey as a buyer or seller today
-      </p>
+    <div class="card-body p-5">
+      <h2 class="fw-bold text-center mb-4">🚀 Join Vendora</h2>
+      <form method="POST" enctype="multipart/form-data">
+        <div class="row">
+          <div class="col-md-6 mb-3">
+            <label class="form-label small fw-bold">FULL NAME</label>
+            <input
+              type="text"
+              name="name"
+              class="form-control form-control-premium"
+              placeholder="John Doe"
+              required
+            />
+          </div>
+          <div class="col-md-6 mb-3">
+            <label class="form-label small fw-bold">CHOOSE ROLE</label>
+            <select
+              name="role"
+              id="roleSelect"
+              class="form-select form-control-premium"
+              required
+              onchange="toggleSellerFields()"
+            >
+              <option value="customer">🛍️ Customer</option>
+              <option value="seller">🏪 Seller</option>
+            </select>
+          </div>
+        </div>
+
+        <div
+          id="sellerFields"
+          style="display: none"
+          class="p-3 bg-light rounded-4 border mb-4"
+        >
+          <div class="mb-3">
+            <label class="form-label small fw-bold text-primary"
+              >SHOP NAME</label
+            >
+            <input
+              type="text"
+              name="shop_name"
+              class="form-control border-2"
+              placeholder="e.g. Aditya's Store"
+            />
+          </div>
+          <div class="mb-0">
+            <label class="form-label small fw-bold text-primary"
+              >SHOP ADDRESS</label
+            >
+            <textarea
+              name="shop_address"
+              class="form-control border-2"
+              rows="2"
+              placeholder="Full shop location..."
+            ></textarea>
+          </div>
+        </div>
+
+        <div class="row">
+          <div class="col-md-6 mb-3">
+            <label class="form-label small fw-bold">EMAIL ADDRESS</label>
+            <input
+              type="email"
+              name="email"
+              class="form-control form-control-premium"
+              required
+            />
+          </div>
+          <div class="col-md-6 mb-3">
+            <label class="form-label small fw-bold">PASSWORD</label>
+            <input
+              type="password"
+              name="password"
+              class="form-control form-control-premium"
+              required
+            />
+          </div>
+        </div>
+
+        <div class="row">
+          <div class="col-md-6 mb-3">
+            <label class="form-label small fw-bold">AGE</label>
+            <input
+              type="number"
+              name="age"
+              class="form-control form-control-premium"
+              required
+            />
+          </div>
+          <div class="col-md-6 mb-3">
+            <label class="form-label small fw-bold">GENDER</label>
+            <select name="gender" class="form-select form-control-premium">
+              <option value="Male">Male</option>
+              <option value="Female">Female</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="mb-3">
+          <label class="form-label small fw-bold">PERSONAL ADDRESS</label>
+          <textarea
+            name="address"
+            class="form-control form-control-premium"
+            rows="2"
+            required
+          ></textarea>
+        </div>
+
+        <div class="mb-4">
+          <label class="form-label small fw-bold">PROFILE PHOTO</label>
+          <input
+            type="file"
+            name="profile_pic"
+            class="form-control form-control-premium"
+            accept="image/*"
+          />
+        </div>
+
+        <button
+          type="submit"
+          class="btn btn-dark btn-lg w-100 rounded-pill py-3 fw-bold shadow"
+        >
+          Create Account ✨
+        </button>
+      </form>
     </div>
-
-    <form method="POST">
-      <div class="mb-3">
-        <label class="form-label small fw-bold text-secondary">Full Name</label>
-        <input
-          type="text"
-          name="name"
-          class="form-control"
-          placeholder="John Doe"
-          required
-        />
-      </div>
-      <div class="mb-3">
-        <label class="form-label small fw-bold text-secondary"
-          >Email Address</label
-        >
-        <input
-          type="email"
-          name="email"
-          class="form-control"
-          placeholder="john@example.com"
-          required
-        />
-      </div>
-      <div class="mb-3">
-        <label class="form-label small fw-bold text-secondary"
-          >Create Password</label
-        >
-        <input
-          type="password"
-          name="password"
-          class="form-control"
-          placeholder="••••••••"
-          required
-        />
-      </div>
-      <div class="mb-4">
-        <label class="form-label small fw-bold text-secondary"
-          >Select Your Role</label
-        >
-        <select name="role" class="form-select form-control" required>
-          <option value="" disabled selected>Who are you?</option>
-          <option value="customer">🛍️ Customer (Buyer)</option>
-          <option value="seller">🏪 Seller (Vendor)</option>
-        </select>
-      </div>
-
-      <button
-        type="submit"
-        class="btn btn-cool w-100 py-3 rounded-pill shadow-sm"
-      >
-        Create Account ✨
-      </button>
-
-      <div class="text-center mt-4">
-        <span class="text-muted small"
-          >Already a member?
-          <a href="/login" class="text-info fw-bold text-decoration-none"
-            >Login Now</a
-          >
-        </span>
-      </div>
-    </form>
   </div>
 </div>
+<script>
+  function toggleSellerFields() {
+    const role = document.getElementById("roleSelect").value;
+    document.getElementById("sellerFields").style.display =
+      role === "seller" ? "block" : "none";
+  }
+</script>
 {% endblock %}

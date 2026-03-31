@@ -1,0 +1,72 @@
+{% extends "base.html" %} {% block content %}
+<div class="container mt-5 animate-page">
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <h2 class="fw-bold text-dark">📦 Product Moderation Catalog</h2>
+    <a
+      href="{{ url_for('admin.dashboard') }}"
+      class="btn btn-outline-dark btn-sm rounded-pill px-3"
+      >Back to Tower</a
+    >
+  </div>
+
+  <div class="card glass-card border-0 shadow-lg p-4">
+    <div class="table-responsive">
+      <table class="table table-hover align-middle">
+        <thead class="table-dark">
+          <tr>
+            <th>#</th>
+            <th>Product Image</th>
+            <th>Name & Seller</th>
+            <th>Price</th>
+            <th>Stock</th>
+            <th class="text-center">Action</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for product in products %}
+          <tr>
+            <td class="text-muted fw-bold">{{ loop.index }}</td>
+            <td>
+              <img
+                src="{{ url_for('static', filename='images/products/' + product.image) if product.image else 'https://via.placeholder.com/50' }}"
+                class="rounded-3 shadow-sm"
+                width="50"
+                height="50"
+                style="object-fit: cover"
+              />
+            </td>
+            <td>
+              <div class="fw-bold text-dark">{{ product.name }}</div>
+              <small class="text-primary fw-bold"
+                >🏪 {{ product.seller.company_name }}</small
+              >
+            </td>
+            <td class="fw-bold text-success">
+              ₹{{ "{:,.2f}".format(product.price) }}
+            </td>
+            <td>{{ product.stock }} pcs</td>
+            <td class="text-center">
+              <!-- ✅ LINK MATCHED WITH BACKEND -->
+              <a
+                href="{{ url_for('admin.delete_product_admin', product_id=product.id) }}"
+                class="btn btn-sm btn-danger rounded-pill px-3 shadow-sm"
+                onclick="
+                  return confirm(
+                    'Permanently remove this product from the marketplace?',
+                  );
+                "
+              >
+                <i class="bi bi-trash"></i> Remove
+              </a>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    {% if not products %}
+    <p class="text-center py-5 text-muted">No products found.</p>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}
