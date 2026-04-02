@@ -4,7 +4,7 @@ from backend.config import Config
 from backend.extensions import db, login_manager, bcrypt
 
 def create_app():
-    # 🚨 [DEPLOYMENT FIX]: Absolute paths for Render server
+    # 🚨 [DEPLOYMENT FIX 1]: Absolute paths for Render server templates/static
     base_dir = os.path.abspath(os.path.dirname(__file__))
     template_dir = os.path.join(base_dir, '../frontend/templates')
     static_dir = os.path.join(base_dir, '../frontend/static')
@@ -12,12 +12,22 @@ def create_app():
     app = Flask(__name__, template_folder=template_dir, static_folder=static_dir)
     app.config.from_object(Config)
 
+    # 🚨 [DEPLOYMENT FIX 2]: SSL Connection Fix for Cloud Database
+    # Isse wo 'ssl-mode' wala TypeError khatam ho jayega
+    app.config.update(
+        SQLALCHEMY_ENGINE_OPTIONS={
+            "connect_args": {
+                "ssl": None  # SSL disable karne ka professional tarika
+            }
+        }
+    )
+
     # 1. Initialize Extensions
     db.init_app(app)
     login_manager.init_app(app)
     bcrypt.init_app(app)
 
-    # 2. User Loader Logic
+    # 2. User Loader Logic for Login
     from backend.models.user_model import User
     @login_manager.user_loader
     def load_user(user_id):
@@ -37,7 +47,7 @@ def create_app():
 
     # 4. Register Blueprints (Routes)
     from backend.routes.auth_routes import auth_bp
-    from backend.routes.seller_routes import seller_bp
+    from backend.routes.seller_routes import seller_bp 
     from backend.routes.admin_routes import admin_bp
     from backend.routes.customer_routes import customer_bp
     from backend.routes.product_routes import product_bp
@@ -52,20 +62,22 @@ def create_app():
     app.register_blueprint(cart_bp)
     app.register_blueprint(order_bp)
 
-    # 5. Global Home Route with Search/Filter Logic
+    # 5. Global Home Route with Smart Search/Filter Logic
     @app.route('/')
     def index():
         from backend.models.product_model import Product, Category
         search_query = request.args.get('search', '')
         category_id = request.args.get('category', '')
         
+        # Base query to fetch only active products
         query = Product.query.filter_by(is_active=True)
+        
         if search_query:
             query = query.filter(Product.name.ilike(f'%{search_query}%'))
         if category_id:
             query = query.filter_by(category_id=category_id)
             
-        products = query.order_by(Product.created_at.desc()).all()
+        products = query.order_by(Product.id.desc()).all()
         categories = Category.query.all()
         return render_template("index.html", products=products, categories=categories)
 
