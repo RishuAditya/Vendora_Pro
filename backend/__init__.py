@@ -80,5 +80,16 @@ def create_app():
         products = query.order_by(Product.id.desc()).all()
         categories = Category.query.all()
         return render_template("index.html", products=products, categories=categories)
+    
+    @app.route('/setup')
+    def setup_db():
+        from backend.models.product_model import Category
+        if not Category.query.first():
+            cats = ['Electronics', 'Fashion', 'Groceries', 'Home Decor', 'Gadgets']
+            for c in cats:
+                db.session.add(Category(name=c))
+            db.session.commit()
+            return "Categories Added Successfully! ✅"
+        return "Already Setup!"
 
     return app
