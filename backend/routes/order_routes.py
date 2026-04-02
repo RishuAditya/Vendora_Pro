@@ -1,4 +1,6 @@
-
+# ---------------------------------------------------------
+# 2.0 TOPIC: ENTERPRISE FINANCIAL AUDIT & ORDER SYSTEM
+# ---------------------------------------------------------
 from flask import Blueprint, render_template, redirect, url_for, flash, request, session
 from flask_login import login_required, current_user
 from backend.extensions import db
@@ -11,7 +13,7 @@ from datetime import datetime, timedelta
 
 order_bp = Blueprint("order", __name__)
 
-# 2.1 CHECKOUT SELECTION PAGE (Logic for Totals & Offers)
+# 2.1 CHECKOUT SELECTION PAGE (With Coupon & Wallet Context)
 @order_bp.route("/checkout-selection")
 @login_required
 def checkout_page():
@@ -20,32 +22,32 @@ def checkout_page():
         flash("Bhai, cart khali hai!", "warning")
         return redirect(url_for('index'))
     
-    total = sum(item.product.price * item.quantity for item in cart_items)
+    base_total = sum(item.product.price * item.quantity for item in cart_items if item.product)
     
     # Calculate Coupon Discount
     discount = 0.0
     applied_code = session.get('applied_coupon')
     if applied_code:
         cp = Coupon.query.filter_by(code=applied_code, is_active=True).first()
-        if cp and total >= cp.min_purchase:
-            discount = (total * cp.discount_value / 100) if cp.is_percentage else cp.discount_value
+        if cp and base_total >= cp.min_purchase:
+            discount = (base_total * cp.discount_value / 100) if cp.is_percentage else cp.discount_value
         else:
             session.pop('applied_coupon', None)
 
-    final_total = total - discount
+    final_total = base_total - discount
     user_cards = SavedCard.query.filter_by(user_id=current_user.id).all()
     all_offers = Coupon.query.filter_by(is_active=True).all()
     
-    return render_template("checkout.html", total=total, discount=discount, 
+    return render_template("checkout.html", total=base_total, discount=discount, 
                            final_total=final_total, saved_cards=user_cards, offers=all_offers)
 
-# 2.2 APPLY COUPON ROUTE (Usage Check Added)
+# 2.2 APPLY COUPON ROUTE (With Range & Usage Tracking)
 @order_bp.route("/apply-coupon", methods=["POST"])
 @login_required
 def apply_coupon():
     code = request.form.get("coupon_code").upper().strip()
     cart_items = Cart.query.filter_by(user_id=current_user.id).all()
-    total = sum(i.product.price * i.quantity for i in cart_items)
+    total = sum(i.product.price * i.quantity for i in cart_items if i.product)
     
     cp = Coupon.query.filter_by(code=code, is_active=True).first()
     if cp:
@@ -74,8 +76,8 @@ def process_checkout():
     cart_items = Cart.query.filter_by(user_id=current_user.id).all()
     if not cart_items: return redirect(url_for('index'))
 
-    # Totals Calculation
-    base_total = sum(item.product.price * item.quantity for item in cart_items)
+    # Re-calculate Final Amounts
+    base_total = sum(item.product.price * item.quantity for item in cart_items if item.product)
     discount = 0.0
     applied_cp_obj = None
     if session.get('applied_coupon'):
@@ -105,28 +107,30 @@ def process_checkout():
     last_four = "0000"
     if pay_mode in ['card', 'hybrid']:
         if card_id and card_id != "new":
-            last_four = SavedCard.query.get(card_id).card_last_four
+            card = SavedCard.query.get(card_id)
+            last_four = card.card_last_four
         else:
-            last_four = (request.form.get("card_number") or "0000")[-4:]
+            card_no = request.form.get("card_number")
+            last_four = card_no[-4:] if card_no else "0000"
             if request.form.get("save_card") == "on":
                 db.session.add(SavedCard(user_id=current_user.id, card_holder_name=s_name, card_last_four=last_four, card_type="Visa", expiry_date=request.form.get("expiry")))
 
-    # 🚀 Step 1: Create Master Order Header
+    # Step 1: Create Master Order Header
     inv_no = f"INV-{datetime.now().strftime('%Y%m%d%H%M%S')}-{current_user.id}"
     new_order = Order(
         user_id=current_user.id, total_amount=final_amount,
         wallet_amount_paid=wallet_paid, card_amount_paid=card_paid,
         payment_mode=pay_mode.upper(), payment_status="Paid" if pay_mode != 'cod' else "COD",
-        invoice_no=inv_no, shipping_name=s_name, shipping_phone=s_phone, shipping_address=s_address,
+        invoice_no=inv_no, shipping_address=s_address, # Update: using 'shipping_address' column
         customer_name_snapshot=current_user.name, customer_email_snapshot=current_user.email,
-        created_at=datetime.now()
+        created_at=datetime.now() # IST Fix
     )
     db.session.add(new_order)
-    db.session.flush() # Secure order ID
+    db.session.flush()
 
-    seller_list = []
+    seller_info_list = []
 
-    # 🚀 Step 2: Process Items & ESCROW LOCKING
+    # Step 2: Process Items & ESCROW LOCKING
     for item in cart_items:
         order_item = OrderItem(
             order_id=new_order.id, product_id=item.product_id, seller_id=item.product.seller_id,
@@ -138,20 +142,20 @@ def process_checkout():
         # Money to Seller's LOCKED balance
         seller_profile = Seller.query.get(item.product.seller_id)
         seller_user = User.query.get(seller_profile.user_id)
-        seller_list.append(seller_profile.company_name)
+        seller_info_list.append(seller_profile.company_name)
         
         item_total = item.product.price * item.quantity
         seller_user.locked_balance += item_total # Hold money in Escrow
 
-        # [AUDIT]: Detailed entry for Seller
+        # [AUDIT]: Seller detailed entry
         db.session.add(Transaction(
             user_id=seller_user.id, amount=item_total, type='Credit',
             purpose=f"SALE: From {current_user.name} for {item.product.name} (Order #{new_order.id})",
             created_at=datetime.now()
         ))
 
-    # [AUDIT]: Detailed entry for Customer
-    shops_str = ", ".join(list(set(seller_list)))
+    # [AUDIT]: Customer detailed entry
+    shops_str = ", ".join(list(set(seller_info_list)))
     customer_purpose = f"PURCHASE: To {shops_str} via {pay_mode.upper()} (Order #{new_order.id})"
     if pay_mode in ['card', 'hybrid']: customer_purpose += f" (Card ****{last_four})"
     
@@ -167,7 +171,7 @@ def process_checkout():
     flash(f"Order #{new_order.id} placed! Passbooks updated. 🛒🎉", "success")
     return redirect(url_for('order.my_orders'))
 
-# 2.4 DELIVERY & REFUND HANDLING
+# 2.4 DELIVERY CONFIRMATION (RELEASING FUNDS)
 @order_bp.route("/confirm-receipt/<int:item_id>")
 @login_required
 def confirm_receipt(item_id):
@@ -187,6 +191,7 @@ def confirm_receipt(item_id):
         flash("Payment released to seller. Thank you! ✅", "success")
     return redirect(url_for('order.my_orders'))
 
+# 2.5 CANCEL & REFUND
 @order_bp.route("/cancel-order/<int:item_id>")
 @login_required
 def cancel_order(item_id):
@@ -209,7 +214,7 @@ def cancel_order(item_id):
     flash("Cancelled and Refunded. 💰", "info")
     return redirect(url_for('order.my_orders'))
 
-# 2.5 HELPERS (My Orders, Invoice, Buy Now, Statement)
+# 2.6 HELPERS (My Orders, Invoice, Buy Now, Statement)
 @order_bp.route("/my-orders")
 @login_required
 def my_orders():
