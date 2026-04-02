@@ -1,4 +1,5 @@
 import os
+import json
 from flask import Flask, render_template, request
 from backend.config import Config
 from backend.extensions import db, login_manager, bcrypt
@@ -13,11 +14,10 @@ def create_app():
     app.config.from_object(Config)
 
     # 🚨 [DEPLOYMENT FIX 2]: SSL Connection Fix for Cloud Database
-    # Isse wo 'ssl-mode' wala TypeError hamesha ke liye khatam ho jayega
     app.config.update(
         SQLALCHEMY_ENGINE_OPTIONS={
             "connect_args": {
-                "ssl": None  # SSL disable karne ka professional tarika
+                "ssl": None  # SSL disable for Aiven Cloud compatibility
             }
         }
     )
@@ -33,8 +33,9 @@ def create_app():
     def load_user(user_id):
         return User.query.get(int(user_id))
 
-    # 3. Context ke andar Database Initialization
+    # 3. Context ke andar Database Initialization (Auto-Create Tables)
     with app.app_context():
+        # Import all models to ensure SQLAlchemy detects them
         from backend.models.user_model import User, SavedCard, Notification
         from backend.models.seller_model import Seller
         from backend.models.product_model import Category, Product, ProductImage
@@ -42,7 +43,7 @@ def create_app():
         from backend.models.transaction_model import Transaction
         from backend.models.review_model import Review
         
-        # 🚀 [CRITICAL]: Create tables automatically on Aiven Cloud
+        # 🚀 Create tables automatically on Cloud if they don't exist
         db.create_all()
 
     # 4. Register Blueprints (Routes)
@@ -82,7 +83,6 @@ def create_app():
         return render_template("index.html", products=products, categories=categories)
 
     # 🛠️ 6. SECRET CLOUD INITIALIZATION (15 Categories + Admin Account)
-    # Ise sirf ek baar run karna hai: /setup-everything-secretly
     @app.route('/setup-everything-secretly')
     def setup_cloud():
         from backend.models.product_model import Category
