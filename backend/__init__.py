@@ -1,29 +1,41 @@
+import os
 from flask import Flask, render_template, request
 from backend.config import Config
 from backend.extensions import db, login_manager, bcrypt
 
 def create_app():
-    app = Flask(__name__, template_folder='../frontend/templates', static_folder='../frontend/static')
+    # 🚨 [DEPLOYMENT FIX]: Absolute paths for Render server
+    base_dir = os.path.abspath(os.path.dirname(__file__))
+    template_dir = os.path.join(base_dir, '../frontend/templates')
+    static_dir = os.path.join(base_dir, '../frontend/static')
+
+    app = Flask(__name__, template_folder=template_dir, static_folder=static_dir)
     app.config.from_object(Config)
 
+    # 1. Initialize Extensions
     db.init_app(app)
     login_manager.init_app(app)
     bcrypt.init_app(app)
 
+    # 2. User Loader Logic
     from backend.models.user_model import User
     @login_manager.user_loader
     def load_user(user_id):
         return User.query.get(int(user_id))
 
+    # 3. Context ke andar Database Initialization
     with app.app_context():
         from backend.models.user_model import User, SavedCard, Notification
         from backend.models.seller_model import Seller
         from backend.models.product_model import Category, Product, ProductImage
-        from backend.models.order_model import Order, OrderItem
+        from backend.models.order_model import Order, OrderItem, Coupon, UsedCoupon
         from backend.models.transaction_model import Transaction
         from backend.models.review_model import Review
+        
+        # 🚀 [CRITICAL]: Create tables automatically on Aiven Cloud
+        db.create_all()
 
-    # Register Blueprints
+    # 4. Register Blueprints (Routes)
     from backend.routes.auth_routes import auth_bp
     from backend.routes.seller_routes import seller_bp
     from backend.routes.admin_routes import admin_bp
@@ -40,14 +52,19 @@ def create_app():
     app.register_blueprint(cart_bp)
     app.register_blueprint(order_bp)
 
+    # 5. Global Home Route with Search/Filter Logic
     @app.route('/')
     def index():
         from backend.models.product_model import Product, Category
         search_query = request.args.get('search', '')
         category_id = request.args.get('category', '')
+        
         query = Product.query.filter_by(is_active=True)
-        if search_query: query = query.filter(Product.name.ilike(f'%{search_query}%'))
-        if category_id: query = query.filter_by(category_id=category_id)
+        if search_query:
+            query = query.filter(Product.name.ilike(f'%{search_query}%'))
+        if category_id:
+            query = query.filter_by(category_id=category_id)
+            
         products = query.order_by(Product.created_at.desc()).all()
         categories = Category.query.all()
         return render_template("index.html", products=products, categories=categories)
