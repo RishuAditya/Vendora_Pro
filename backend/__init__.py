@@ -1,5 +1,5 @@
 # ---------------------------------------------------------
-# VENDORA PRO - MASTER APPLICATION FACTORY (DEPLOYMENT READY)
+# VENDORA PRO - MASTER APPLICATION FACTORY (VERCEL READY)
 # ---------------------------------------------------------
 import os
 import json
@@ -8,18 +8,20 @@ from backend.config import Config
 from backend.extensions import db, login_manager, bcrypt
 
 def create_app():
-    # 🚨 [FIX 1]: Absolute paths resolution for Render/Cloud
+    # 🚨 [VERCEL PATH FIX]: Absolute path logic ensuring frontend is always found
+    # Base dir is 'backend' folder, we go up to root then into frontend
     base_dir = os.path.abspath(os.path.dirname(__file__))
-    template_dir = os.path.join(base_dir, '../frontend/templates')
-    static_dir = os.path.join(base_dir, '../frontend/static')
+    root_dir = os.path.abspath(os.path.join(base_dir, ".."))
+    template_dir = os.path.join(root_dir, 'frontend', 'templates')
+    static_dir = os.path.join(root_dir, 'frontend', 'static')
 
     app = Flask(__name__, template_folder=template_dir, static_folder=static_dir)
     app.config.from_object(Config)
 
-    # 🚨 [FIX 2]: Universal Cloud Database SSL Fix
+    # 🚨 [CLOUD DB FIX]: SSL Connection Fix for Aiven MySQL
     app.config.update(
         SQLALCHEMY_ENGINE_OPTIONS={
-            "connect_args": {"ssl": None} # Cloud compatibility
+            "connect_args": {"ssl": None} 
         }
     )
 
@@ -34,10 +36,9 @@ def create_app():
     def load_user(user_id):
         return User.query.get(int(user_id))
 
-    # 3. 🛡️ CRITICAL: FORCE DATABASE SYNC (Creating all 9 Tables)
+    # 3. 🛡️ DATABASE SYNC: Force creation of all 9 Tables on Cloud
     with app.app_context():
-        print("Force Syncing All Tables to Cloud...")
-        # Sabhi models ko manually import kar rahe hain taaki SQLAlchemy kisi ko na chhode
+        # Import all models to ensure SQLAlchemy detects them for Vercel
         from backend.models.user_model import User, SavedCard, Notification
         from backend.models.seller_model import Seller
         from backend.models.product_model import Category, Product, ProductImage
@@ -45,9 +46,8 @@ def create_app():
         from backend.models.transaction_model import Transaction
         from backend.models.review_model import Review
         
-        # Cloud par saari tables banayi ja rahi hain
+        # Create tables automatically
         db.create_all()
-        print("Database Schema Sync Successful! ✅")
 
     # 4. Blueprint Registration (Connecting all Routes)
     from backend.routes.auth_routes import auth_bp
@@ -74,6 +74,7 @@ def create_app():
         category_id = request.args.get('category', '')
         
         query = Product.query.filter_by(is_active=True)
+        
         if search_query:
             query = query.filter(Product.name.ilike(f'%{search_query}%'))
         if category_id:
@@ -101,7 +102,7 @@ def create_app():
                 db.session.add(Category(name=n))
             db.session.commit()
 
-        # B. Initial Admin Account (User ID: 1)
+        # B. Initial Admin Account (admin@vendora.com / admin123)
         admin_email = "admin@vendora.com"
         if not User.query.filter_by(email=admin_email).first():
             hashed_pw = bcrypt.generate_password_hash("admin123").decode('utf-8')
@@ -113,7 +114,7 @@ def create_app():
                 wallet_balance=0.0,
                 age=30,
                 gender="Male",
-                full_address="Vendora Cloud Headquarters",
+                full_address="Vendora Cloud HQ",
                 profile_pic="default_pro.png"
             )
             db.session.add(new_admin)
