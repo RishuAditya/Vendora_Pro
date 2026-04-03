@@ -1,5 +1,5 @@
 # ---------------------------------------------------------
-# VENDORA PRO - MASTER APPLICATION FACTORY
+# VENDORA PRO - MASTER APPLICATION FACTORY (DEPLOYMENT READY)
 # ---------------------------------------------------------
 import os
 import json
@@ -8,8 +8,7 @@ from backend.config import Config
 from backend.extensions import db, login_manager, bcrypt
 
 def create_app():
-    # 🚨 [DEPLOYMENT FIX 1]: Absolute paths resolution for Render/Cloud
-    # Isse server ko HTML aur CSS dhoondhne mein kabhi dikat nahi hogi
+    # 🚨 [FIX 1]: Absolute paths resolution for Render/Cloud
     base_dir = os.path.abspath(os.path.dirname(__file__))
     template_dir = os.path.join(base_dir, '../frontend/templates')
     static_dir = os.path.join(base_dir, '../frontend/static')
@@ -17,13 +16,10 @@ def create_app():
     app = Flask(__name__, template_folder=template_dir, static_folder=static_dir)
     app.config.from_object(Config)
 
-    # 🚨 [DEPLOYMENT FIX 2]: Universal Cloud Database SSL Fix
-    # Isse Aiven MySQL connection bina kisi TypeError ke chalega
+    # 🚨 [FIX 2]: Universal Cloud Database SSL Fix
     app.config.update(
         SQLALCHEMY_ENGINE_OPTIONS={
-            "connect_args": {
-                "ssl": None # Bypass SSL mode for cloud compatibility
-            }
+            "connect_args": {"ssl": None} # Cloud compatibility
         }
     )
 
@@ -38,10 +34,10 @@ def create_app():
     def load_user(user_id):
         return User.query.get(int(user_id))
 
-    # 3. Database Context: Import All Models & Auto-Create Tables
+    # 3. 🛡️ CRITICAL: FORCE DATABASE SYNC (Creating all 9 Tables)
     with app.app_context():
-        print("Initialising Cloud Database Sync...")
-        # Sari tables ko context mein lana zaroori hai
+        print("Force Syncing All Tables to Cloud...")
+        # Sabhi models ko manually import kar rahe hain taaki SQLAlchemy kisi ko na chhode
         from backend.models.user_model import User, SavedCard, Notification
         from backend.models.seller_model import Seller
         from backend.models.product_model import Category, Product, ProductImage
@@ -49,9 +45,9 @@ def create_app():
         from backend.models.transaction_model import Transaction
         from backend.models.review_model import Review
         
-        # 🚀 [CRITICAL]: Create tables automatically on Aiven Cloud
+        # Cloud par saari tables banayi ja rahi hain
         db.create_all()
-        print("All Tables Verified/Created Successfully! ✅")
+        print("Database Schema Sync Successful! ✅")
 
     # 4. Blueprint Registration (Connecting all Routes)
     from backend.routes.auth_routes import auth_bp
@@ -77,9 +73,7 @@ def create_app():
         search_query = request.args.get('search', '')
         category_id = request.args.get('category', '')
         
-        # Base query to fetch active items
         query = Product.query.filter_by(is_active=True)
-        
         if search_query:
             query = query.filter(Product.name.ilike(f'%{search_query}%'))
         if category_id:
@@ -90,7 +84,6 @@ def create_app():
         return render_template("index.html", products=products, categories=categories)
 
     # 🛠️ 6. MASTER SETUP ROUTE (For Cloud Initialization)
-    # Ise sirf 1 baar run karna: /setup-everything-secretly
     @app.route('/setup-everything-secretly')
     def setup_cloud():
         from backend.models.product_model import Category
