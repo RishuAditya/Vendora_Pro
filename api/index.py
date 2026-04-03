@@ -1,11 +1,12 @@
 import os
 import sys
 
-# Vercel ko backend folder dhoondhne mein help karne ke liye
-sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
+# Current directory ko path mein add karo
+path = os.path.dirname(os.path.abspath(__file__))
+sys.path.insert(0, os.path.join(path, ".."))
 
 from backend import create_app
 
 app = create_app()
 
-# Vercel ko sirf 'app' chahiye hota hai
+# Vercel requires the app variable to be at the top level
