@@ -1,15 +1,13 @@
 # ---------------------------------------------------------
-# VENDORA PRO - MASTER APPLICATION FACTORY (VERCEL READY)
+# VENDORA PRO - STABLE VERCEL FACTORY
 # ---------------------------------------------------------
 import os
-import json
 from flask import Flask, render_template, request
 from backend.config import Config
 from backend.extensions import db, login_manager, bcrypt
 
 def create_app():
-    # 🚨 [VERCEL PATH FIX]: Absolute path logic ensuring frontend is always found
-    # Base dir is 'backend' folder, we go up to root then into frontend
+    # 🚨 PATH FIX FOR VERCEL
     base_dir = os.path.abspath(os.path.dirname(__file__))
     root_dir = os.path.abspath(os.path.join(base_dir, ".."))
     template_dir = os.path.join(root_dir, 'frontend', 'templates')
@@ -18,38 +16,23 @@ def create_app():
     app = Flask(__name__, template_folder=template_dir, static_folder=static_dir)
     app.config.from_object(Config)
 
-    # 🚨 [CLOUD DB FIX]: SSL Connection Fix for Aiven MySQL
+    # 🚨 CLOUD DB SSL FIX
     app.config.update(
         SQLALCHEMY_ENGINE_OPTIONS={
             "connect_args": {"ssl": None} 
         }
     )
 
-    # 1. Initialize Global Extensions
     db.init_app(app)
     login_manager.init_app(app)
     bcrypt.init_app(app)
 
-    # 2. Flask-Login: User Loader Logic
     from backend.models.user_model import User
     @login_manager.user_loader
     def load_user(user_id):
         return User.query.get(int(user_id))
 
-    # 3. 🛡️ DATABASE SYNC: Force creation of all 9 Tables on Cloud
-    with app.app_context():
-        # Import all models to ensure SQLAlchemy detects them for Vercel
-        from backend.models.user_model import User, SavedCard, Notification
-        from backend.models.seller_model import Seller
-        from backend.models.product_model import Category, Product, ProductImage
-        from backend.models.order_model import Order, OrderItem, Coupon, UsedCoupon
-        from backend.models.transaction_model import Transaction
-        from backend.models.review_model import Review
-        
-        # Create tables automatically
-        db.create_all()
-
-    # 4. Blueprint Registration (Connecting all Routes)
+    # 🚀 BLUEPRINTS REGISTRATION
     from backend.routes.auth_routes import auth_bp
     from backend.routes.seller_routes import seller_bp 
     from backend.routes.admin_routes import admin_bp
@@ -66,61 +49,49 @@ def create_app():
     app.register_blueprint(cart_bp)
     app.register_blueprint(order_bp)
 
-    # 5. Global Home Route: Integrated Smart Search & Category Filter
+    # 🏠 HOME ROUTE
     @app.route('/')
     def index():
         from backend.models.product_model import Product, Category
         search_query = request.args.get('search', '')
         category_id = request.args.get('category', '')
-        
         query = Product.query.filter_by(is_active=True)
-        
         if search_query:
             query = query.filter(Product.name.ilike(f'%{search_query}%'))
         if category_id:
             query = query.filter_by(category_id=category_id)
-            
         products = query.order_by(Product.id.desc()).all()
         categories = Category.query.all()
         return render_template("index.html", products=products, categories=categories)
 
-    # 🛠️ 6. MASTER SETUP ROUTE (For Cloud Initialization)
-    @app.route('/setup-everything-secretly')
-    def setup_cloud():
-        from backend.models.product_model import Category
-        from backend.models.user_model import User
-        
-        # A. 15 Pro-Level Categories
-        if not Category.query.first():
-            names = [
-                'Electronics', 'Fashion', 'Groceries', 'Home Decor', 
-                'Gadgets', 'Perfumes', 'Books', 'Sports & Fitness', 
-                'Beauty & Care', 'Kitchen Appliances', 'Toys & Baby',
-                'Watches', 'Footwear', 'Health', 'Automotive'
-            ]
-            for n in names:
-                db.session.add(Category(name=n))
-            db.session.commit()
+    # 🛠️ MANUAL DATABASE SETUP (Run this once after deployment)
+    @app.route('/deploy-setup')
+    def deploy_setup():
+        try:
+            # Import models inside function to avoid circular imports
+            from backend.models.user_model import User, SavedCard, Notification
+            from backend.models.seller_model import Seller
+            from backend.models.product_model import Category, Product, ProductImage
+            from backend.models.order_model import Order, OrderItem, Coupon, UsedCoupon
+            from backend.models.transaction_model import Transaction
+            from backend.models.review_model import Review
+            
+            # Create Tables
+            db.create_all()
 
-        # B. Initial Admin Account (admin@vendora.com / admin123)
-        admin_email = "admin@vendora.com"
-        if not User.query.filter_by(email=admin_email).first():
-            hashed_pw = bcrypt.generate_password_hash("admin123").decode('utf-8')
-            new_admin = User(
-                name="Super Admin",
-                email=admin_email,
-                password=hashed_pw,
-                role="admin",
-                wallet_balance=0.0,
-                age=30,
-                gender="Male",
-                full_address="Vendora Cloud HQ",
-                profile_pic="default_pro.png"
-            )
-            db.session.add(new_admin)
+            # Create Default Admin & Categories if missing
+            if not Category.query.first():
+                names = ['Electronics', 'Fashion', 'Groceries', 'Gadgets', 'Home Decor']
+                for n in names: db.session.add(Category(name=n))
+            
+            admin_email = "admin@vendora.com"
+            if not User.query.filter_by(email=admin_email).first():
+                hashed_pw = bcrypt.generate_password_hash("admin123").decode('utf-8')
+                db.session.add(User(name="Admin", email=admin_email, password=hashed_pw, role="admin", wallet_balance=0.0))
+            
             db.session.commit()
-            return "<h1>Cloud Setup Complete! ✅</h1><p>15 Categories added. Admin: admin@vendora.com created.</p><a href='/'>Go to Home</a>"
-        
-        return "<h1>System already initialized.</h1><a href='/'>Go to Home</a>"
+            return "<h1>Database Sync Success! ✅</h1><a href='/'>Go to Home</a>"
+        except Exception as e:
+            return f"<h1>Setup Failed ❌</h1><p>{str(e)}</p>"
 
     return app
